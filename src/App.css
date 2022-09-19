@@ -8,8 +8,10 @@
 }
 
 .App-header {
-  background-color: #467cb1;
-  padding: 2rem;
+  text-align: center;
+  font-size: 19px;
+  background-color: #228BE6;
+  padding: 1rem;
   color: white;
 }
 

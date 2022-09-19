@@ -1,7 +1,11 @@
+import React from 'react';
+import Header from './components/Header';
 import "./App.css";
 
 function App() {
-  return <div className="App">payments-app</div>;
+  return (
+    <Header />
+  )
 }
 
 export default App;
