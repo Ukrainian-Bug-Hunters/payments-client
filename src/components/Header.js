@@ -1,11 +1,14 @@
 import React from "react";
+import { Grommet, Header } from "grommet";
 
-const Header = () => {
+const AppHeader = () => {
     return (
-        <header className="App-header">
-            <h1>Payments</h1>
-        </header>
+        <Grommet>
+            <Header background="brand" justify="center">
+                <h1 className="App-title">Payments</h1>
+            </Header>
+        </Grommet>
     )
 }
 
-export default Header;
+export default AppHeader;
