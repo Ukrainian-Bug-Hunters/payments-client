@@ -1,19 +1,14 @@
-import React from 'react';
-import Header from './components/Header';
-import Hero from './components/Hero';
-import Main from './components/Main';
-import Footer from './components/Footer';
+import React from "react";
+import Hero from "./components/Hero";
+import { Grommet } from "grommet";
 import "./App.css";
 
 function App() {
   return (
-    <>
-      <Header />
+    <Grommet>
       <Hero />
-      <Main />
-      <Footer />
-    </>
-  )
+    </Grommet>
+  );
 }
 
 export default App;
