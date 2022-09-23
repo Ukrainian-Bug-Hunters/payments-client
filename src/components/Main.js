@@ -1,43 +1,53 @@
-import React from "react";
-import { Grommet, Select, TextInput, Button, Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
-
+import React, {useState} from "react";
+import {Select, TextInput, Button, Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
+import currencies from "../data/currencies";
+import payments from "../data/payments";
+import './Main.css';
+console.log(payments)
 const Main = () => {
-    const [firstValue, setFirstValue] = React.useState('USD');
-    const [secondValue, setSecondValue] = React.useState('0.00');
-    const [thirdValue, setThirdValue] = React.useState('???');
+    const [currency, setCurrency] = useState('USD');
+    let amount = 0;
+    const [convertResult, setConvertResult] = useState('???');
+
+    function convert(){
+        fetch(`https://api.exchangerate.host/convert?from=${currency}&to=GBP&amount=${amount}`)
+        .then(response => response.json())
+        .then(res => setConvertResult(res.result))
+    }
 
     return (
-        <Grommet>
-            <main className="Calc-container">
-                <h2 className="Calc-title">Calculate payment in GBP</h2>
-                    <div className="Calc-data-container">
+            <main className="calculator-and-payments">
+             <section className="calc-section">
+                <h2 className="calc-title">Calculate payment in GBP</h2>
+                    <div className="calc-data-container">
                         <span>
-                            <Select className="Convert-select"
-                                options={['USD']}
-                                value={firstValue}
-                                onChange={({ option }) => setFirstValue(option)}
+                            <Select className="convert-select"
+                                options={currencies}
+                                value={currency}
+                                onChange={({option}) => setCurrency(option)}
                             />
                         </span>
                         <span>
-                            <TextInput className="Calc-text-input"
+                            <TextInput className="calc-text-input"
                                 placeholder="type here"
-                                value={secondValue}
-                                onChange={event => setSecondValue(event.target.value)}
+                                onChange={(event) => {amount = event.target.value}}
                             />
                         </span>
-                        <p className="Calc-res">is worth</p>
+                        <p className="calc-res">is worth</p>
                         <span>
-                            <TextInput className="Calc-text-input" readOnly
+                            <TextInput className="calc-text-input" readOnly
                                 placeholder="type here"
-                                value={thirdValue}
-                                onChange={event => setThirdValue(event.target.value)}
+                                value={convertResult}
                             />
                         </span>
                         <p>in GBP.</p>
                     </div>
-                    <Button primary label="CALCULATE" />
-
-                    <h2 className="Payments-title">Payments</h2>
+                    <Button primary label="CALCULATE"
+                        onClick={convert}
+                     />
+                </section>
+                <section className="payments-section">
+                    <h2 className="payments-title">Payments</h2>
                     <Table>
                         <TableHeader>
                             <TableRow>
@@ -81,7 +91,20 @@ const Main = () => {
                                 <TableCell>New headphones purchased from Amazon with free delivery</TableCell>
                                 <TableCell>Complete</TableCell>
                             </TableRow>
-                            <TableRow>
+                        </TableBody>
+                        <TableBody>
+                                {payments.map((payment) => {
+                                    return(
+                                        <TableRow>
+                                        <TableCell>{payment.date}</TableCell>
+                                        <TableCell>{payment.currency}</TableCell>
+                                        <TableCell>{payment.amount}</TableCell>
+                                        <TableCell>{payment.description}</TableCell>
+                                        <TableCell>{payment.status}</TableCell>
+                                        </TableRow>
+                                    )
+                                })}
+                                <TableRow>
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
                                 <TableCell><strong>???</strong></TableCell>
@@ -89,8 +112,8 @@ const Main = () => {
                             </TableRow>
                         </TableBody>
                     </Table>
+                    </section>
             </main>
-        </Grommet>
     )
 }
 

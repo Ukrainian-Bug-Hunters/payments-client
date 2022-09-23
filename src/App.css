@@ -35,47 +35,6 @@
   font-size: 1.1rem;
 }
 
-.Convert-select {
-  white-space: nowrap;
-  width: 4rem !important;
-}
-
-.Calc-title {
-  font-size: 1.5rem;
-  margin: 0;
-}
-
-.Calc-container {
-  margin-top: 3rem;
-  margin-bottom: 4rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.Calc-data-container {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.Calc-text-input {
-  width: 5rem !important;
-  text-align: center !important;
-}
-
-.Calc-res {
-  font-size: 1.1rem;
-}
-
-.Payments-title {
-  font-size: 1.5rem;
-  margin: 3rem 0 0 0;
-}
-
 .App-footer {
   padding: 1rem !important;
 }
