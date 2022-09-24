@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from "react";
 import { Select } from "grommet";
 import currencies from "../data/currencies";
+import "./Hero.css";
 
 const Hero = () => {
   const [currency, setCurrency] = useState("USD");
@@ -25,14 +26,14 @@ const Hero = () => {
   });
 
   return (
-    <div className="Balance-container">
-      <h2 className="Balance-title">Your account balance is</h2>
-      <span className="Balance-value">£ {balanceValue}</span>
-      <p className="Balance-convert">
+    <div className="balance-container">
+      <h2 className="balance-title">Your account balance is</h2>
+      <span className="balance-value">£ {balanceValue}</span>
+      <p className="balance-convert">
         Your balance is <span>{convertedBalance}</span> in{" "}
         <span>
           <Select
-            className="Convert-select"
+            className="convert-select"
             options={currencies}
             value={currency}
             onChange={(e) => {

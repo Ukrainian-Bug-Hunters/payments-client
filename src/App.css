@@ -2,26 +2,4 @@
   text-align: center;
 }
 
-/* Hero */
-.Balance-container {
-  background-color: rgba(217, 203, 255, 0.357);
-  padding: 3rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  justify-content: center;
-  align-items: center;
-}
-.Balance-title {
-  font-size: 1.5rem;
-}
-.Balance-value {
-  font-size: 4rem;
-}
-.Balance-convert {
-  font-size: 1.1rem;
-}
-.Convert-select {
-  white-space: nowrap;
-  width: 4rem !important;
-}
+
