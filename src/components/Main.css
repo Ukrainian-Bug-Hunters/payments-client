@@ -28,6 +28,10 @@
     align-items: center;
 }
 
+.calc-data-container div{
+    width: fit-content;
+}
+
 .convert-select {
     white-space: nowrap;
     width: 4rem !important;

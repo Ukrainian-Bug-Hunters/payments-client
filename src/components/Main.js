@@ -1,18 +1,31 @@
 import React, {useState} from "react";
 import {Select, TextInput, Button, Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
 import currencies from "../data/currencies";
+// todo:
+// get all supported currencies from 
+// https://api.exchangerate.host/symbols
 import payments from "../data/payments";
 import './Main.css';
-console.log(payments)
+
+
 const Main = () => {
-    const [currency, setCurrency] = useState('USD');
-    let amount = 0;
-    const [convertResult, setConvertResult] = useState('???');
+    const [foreingCurrency, setForeingCurrency] = useState('USD');
+    const [foreingAmount, setForeingAmount] = useState(0);
+    const [homeAmount, setHomeAmount] = useState('???');
 
     function convert(){
-        fetch(`https://api.exchangerate.host/convert?from=${currency}&to=GBP&amount=${amount}`)
+        fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`)
         .then(response => response.json())
-        .then(res => setConvertResult(res.result))
+        .then(data => setHomeAmount(data.result));
+    }
+
+    function handleChangeForeingAmount(event){
+        if(Number(event.target.value) || event.target.value === ''){
+            setForeingAmount(event.target.value);
+        }
+        else{
+            event.target.value = foreingAmount;
+        }
     }
 
     return (
@@ -20,27 +33,24 @@ const Main = () => {
              <section className="calc-section">
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
-                        <span>
                             <Select className="convert-select"
                                 options={currencies}
-                                value={currency}
-                                onChange={({option}) => setCurrency(option)}
+                                value={foreingCurrency}
+                                onChange={({currency}) => setForeingCurrency(currency)}
                             />
-                        </span>
-                        <span>
                             <TextInput className="calc-text-input"
                                 placeholder="type here"
-                                onChange={(event) => {amount = event.target.value}}
+                                onChange={(event) => {
+                                    handleChangeForeingAmount(event);
+                                }}
+
                             />
-                        </span>
-                        <p className="calc-res">is worth</p>
-                        <span>
+                        <div className="calc-res">is worth</div>
                             <TextInput className="calc-text-input" readOnly
                                 placeholder="type here"
-                                value={convertResult}
+                                value={homeAmount}
                             />
-                        </span>
-                        <p>in GBP.</p>
+                        <div>in GBP.</div>
                     </div>
                     <Button primary label="CALCULATE"
                         onClick={convert}
@@ -72,30 +82,9 @@ const Main = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell scope="row">
-                                    2022-05-12
-                                </TableCell>
-                                <TableCell>GBP</TableCell>
-                                <TableCell>6.89</TableCell>
-                                <TableCell>Dinner with friends at a local restaurant</TableCell>
-                                <TableCell>Pending</TableCell>
-                                <TableCell><Button primary label="Cancel" /></TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell scope="row">
-                                    2022-08-20
-                                </TableCell>
-                                <TableCell>GBP</TableCell>
-                                <TableCell>12.89</TableCell>
-                                <TableCell>New headphones purchased from Amazon with free delivery</TableCell>
-                                <TableCell>Complete</TableCell>
-                            </TableRow>
-                        </TableBody>
-                        <TableBody>
-                                {payments.map((payment) => {
+                                {payments.map((payment, idx) => {
                                     return(
-                                        <TableRow>
+                                        <TableRow key = {idx}>
                                         <TableCell>{payment.date}</TableCell>
                                         <TableCell>{payment.currency}</TableCell>
                                         <TableCell>{payment.amount}</TableCell>
