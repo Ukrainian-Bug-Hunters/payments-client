@@ -1,10 +1,12 @@
 import React from 'react';
-import AppHeader from './components/Header';
+import Footer from './components/Footer';
 import "./App.css";
 
 function App() {
   return (
-    <AppHeader />
+    <>
+      <Footer />
+    </>
   )
 }
 
