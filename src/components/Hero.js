@@ -4,38 +4,45 @@ import currencies from "../data/currencies";
 import "./Hero.css";
 
 const Hero = () => {
-  const [currency, setCurrency] = useState("USD");
-  const [convertedBalance, setConvertedBalance] = useState(0);
-  const balanceValue = 87.43;
-  const requestURL = `https://api.exchangerate.host/convert?from=GBP&to=${currency}&amount=${balanceValue}`;
+  const [foreignCurrency, setForeignCurrency] = useState("USD");
+  const [foreignAmount, setForeignAmount] = useState(0);
+
+  const homeAmount = 87.43;
+  const homeCurrency = "GBP";
+  const homeCurrencySymbol = '\u00A3';
 
   const handleChangeCurrency = (currency) => {
-    setCurrency(currency);
+    setForeignCurrency(currency);
   };
+
+  const fetchData = async (url) => {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      setForeignAmount(data.result.toFixed(2));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch(requestURL);
-        const data = await response.json();
-        setConvertedBalance(data.result.toFixed(2));
-      } catch (error) {
-        console.log(error);
-      }
-    };
-    fetchData();
-  });
+    const requestURL = `https://api.exchangerate.host/convert?from=${homeCurrency}&to=${foreignCurrency}&amount=${homeAmount}`;
+    fetchData(requestURL);
+  }, [foreignCurrency, homeAmount]);
 
   return (
     <div className="balance-container">
       <h2 className="balance-title">Your account balance is</h2>
-      <span className="balance-value">£ {balanceValue}</span>
+      <span className="balance-value">
+        {homeCurrencySymbol} {homeAmount}
+      </span>
       <p className="balance-convert">
-        Your balance is <span>{convertedBalance}</span> in{" "}
+        Your balance is <span>{foreignAmount}</span> in{" "}
         <span>
           <Select
             className="convert-select"
             options={currencies}
-            value={currency}
+            value={foreignCurrency}
             onChange={(e) => {
               handleChangeCurrency(e.target.value);
             }}
