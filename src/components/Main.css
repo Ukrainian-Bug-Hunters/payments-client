@@ -13,11 +13,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 1rem;
+    gap: 1.5rem;
 }
 
 .calc-title{
-    font-size: 2rem;
+    font-size: 1.5rem;
     margin: 0;
 }
 
@@ -55,7 +55,5 @@
 }
 
 .payments-title {
-    font-size: 1.5rem;
-    margin: 3rem 0 0 0;
+    display: none;
 }
-
