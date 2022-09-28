@@ -29,8 +29,8 @@ const Main = () => {
     }
 
     return (
-            <main className="calculator-and-payments">
-             <section className="calc-section">
+        <main className="calculator-and-payments">
+            <section className="calc-section">
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
                             <Select className="convert-select"
@@ -55,9 +55,9 @@ const Main = () => {
                     <Button primary label="CALCULATE"
                         onClick={convert}
                     />
-                </section>
-                <Payments />
-            </main>
+            </section>
+            <Payments />
+        </main>
     )
 }
 

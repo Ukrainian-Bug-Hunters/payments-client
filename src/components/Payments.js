@@ -10,7 +10,6 @@ const Payments = () => {
     return (
         <section className="payments-section">
             <h2 className="payments-title">Payments</h2>
-            
             <Box align="center" pad="medium">
                 <Tabs activeIndex={activeTabIndex} onActive={setActiveTabIndex} justify="center">
                     <Tab title={tabNames[0]}>
