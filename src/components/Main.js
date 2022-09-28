@@ -1,17 +1,15 @@
 import React, {useState} from "react";
 import {Select, TextInput, Button, Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
-import currencies from "../data/currencies";
-// todo:
-// get all supported currencies from 
-// https://api.exchangerate.host/symbols
 import payments from "../data/payments";
 import './Main.css';
-
+import {useContext} from "react";
+import CurrenciesContext from "../data/CorrenciesContext";
 
 const Main = () => {
     const [foreingCurrency, setForeingCurrency] = useState('USD');
     const [foreingAmount, setForeingAmount] = useState(0);
     const [homeAmount, setHomeAmount] = useState('???');
+    const currencies = useContext(CurrenciesContext);
 
     function convert(){
         fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`)
@@ -34,7 +32,7 @@ const Main = () => {
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
                             <Select className="convert-select"
-                                options={currencies}
+                                options={ Object.keys(currencies) }
                                 value={foreingCurrency}
                                 onChange={({currency}) => setForeingCurrency(currency)}
                             />
