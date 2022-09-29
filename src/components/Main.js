@@ -11,13 +11,13 @@ const Main = () => {
     const [homeAmount, setHomeAmount] = useState('???');
     const currencies = useContext(CurrenciesContext);
 
-    function convert(){
+    const convert = () => {
         fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`)
         .then(response => response.json())
         .then(data => setHomeAmount(data.result));
     }
 
-    function handleChangeForeingAmount(event){
+    const handleChangeForeingAmount = (event) => {
         if(Number(event.target.value) || event.target.value === ''){
             setForeingAmount(event.target.value);
         }
@@ -32,9 +32,9 @@ const Main = () => {
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
                             <Select className="convert-select"
-                                options={ Object.keys(currencies) }
+                                options={ Object.keys(currencies).sort() }
                                 value={foreingCurrency}
-                                onChange={({currency}) => setForeingCurrency(currency)}
+                                onChange={(currency) => setForeingCurrency(currency.target.value)}
                             />
                             <TextInput className="calc-text-input"
                                 placeholder="type here"

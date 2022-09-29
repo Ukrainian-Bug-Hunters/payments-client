@@ -45,7 +45,7 @@ const Hero = () => {
         <span>
           <Select
             className="convert-select"
-            options={ Object.keys(currencies) }
+            options={ Object.keys(currencies).sort() }
             value={foreignCurrency}
             onChange={(e) => {
               handleChangeCurrency(e.target.value);
