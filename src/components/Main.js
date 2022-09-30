@@ -13,32 +13,32 @@ import currencies from "../data/currencies";
 // todo:
 // get all supported currencies from
 // https://api.exchangerate.host/symbols
-import store, { cancelPayments } from "../data/store";
+import store, { cancelPayment } from "../data/store";
 import "./Main.css";
 
-const Main = () => {
+function Main() {
   const [foreingCurrency, setForeingCurrency] = useState("USD");
   const [foreingAmount, setForeingAmount] = useState(0);
   const [homeAmount, setHomeAmount] = useState("???");
-
+  const homeCurrency = "GBP";
   const [, updateState] = React.useState();
   const forceUpdate = React.useCallback(() => updateState({}), []);
 
-  function convert() {
+  const convert = () => {
     fetch(
-      `https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`
+      `https://api.exchangerate.host/convert?from=${foreingCurrency}&to=${homeCurrency}&amount=${foreingAmount}`
     )
       .then((response) => response.json())
       .then((data) => setHomeAmount(data.result));
-  }
+  };
 
-  function handleChangeForeingAmount(event) {
+  const handleChangeForeingAmount = (event) => {
     if (Number(event.target.value) || event.target.value === "") {
       setForeingAmount(event.target.value);
     } else {
       event.target.value = foreingAmount;
     }
-  }
+  };
 
   return (
     <main className="calculator-and-payments">
@@ -110,7 +110,7 @@ const Main = () => {
                         primary
                         label="Cancel"
                         onClick={() => {
-                          store.dispatch(cancelPayments(payment));
+                          store.dispatch(cancelPayment(payment));
                           forceUpdate();
                         }}
                       />
@@ -136,6 +136,6 @@ const Main = () => {
       </section>
     </main>
   );
-};
+}
 
 export default Main;
