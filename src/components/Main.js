@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Select,
   TextInput,
@@ -13,7 +13,7 @@ import currencies from "../data/currencies";
 // todo:
 // get all supported currencies from
 // https://api.exchangerate.host/symbols
-import store, { cancelPayment } from "../data/store";
+import store, { cancelPayment } from "./Store";
 import "./Main.css";
 
 function Main() {
@@ -21,8 +21,8 @@ function Main() {
   const [foreingAmount, setForeingAmount] = useState(0);
   const [homeAmount, setHomeAmount] = useState("???");
   const homeCurrency = "GBP";
-  const [, updateState] = React.useState();
-  const forceUpdate = React.useCallback(() => updateState({}), []);
+  const [, updateState] = useState();
+  const forceUpdate = useCallback(() => updateState({}), []);
 
   const convert = () => {
     fetch(

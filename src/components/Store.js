@@ -1,7 +1,7 @@
-import payments from "./payments";
+import payments from "../data/payments";
 const CANCEL_PAYMENT = "CANCEL-PAYMENTS";
 
-let store = {
+const store = {
   _state: {
     payments,
   },
