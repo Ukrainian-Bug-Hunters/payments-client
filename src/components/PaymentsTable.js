@@ -1,6 +1,6 @@
 import { Table, TableHeader, TableRow, TableCell, TableBody } from 'grommet'
 
-export default function PaymentsTable({payments}) {
+function PaymentsTable({payments}) {
   return (
     <Table> 
         <TableHeader>
@@ -44,3 +44,5 @@ export default function PaymentsTable({payments}) {
         </TableBody>
     </Table>);
 }
+
+export default PaymentsTable;

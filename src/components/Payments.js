@@ -3,7 +3,7 @@ import { Box, Tab, Tabs } from "grommet";
 import PaymentsTable from "./PaymentsTable";
 import payments from "../data/payments";
 
-const Payments = () => { 
+function Payments() {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     const tabNames = ["All Payments", "Completed", "Pending", "Cancelled"];
 
