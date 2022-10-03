@@ -32,7 +32,7 @@ function Main() {
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
                             <Select className="convert-select"
-                                options={currencies}
+                                options={ Object.keys(currencies) }
                                 value={foreingCurrency}
                                 onChange={({currency}) => setForeingCurrency(currency)}
                             />
