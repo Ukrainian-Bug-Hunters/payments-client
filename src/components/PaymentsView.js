@@ -3,7 +3,7 @@ import { Box, Tab, Tabs } from "grommet";
 import PaymentsTable from "./PaymentsTable";
 import payments from "../data/payments";
 
-function Payments() {
+function PaymentsView() {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
     const tabNames = ["All Payments", "Completed", "Pending", "Cancelled"];
 
@@ -47,4 +47,4 @@ function Payments() {
     )
 }
 
-export default Payments;
+export default PaymentsView;

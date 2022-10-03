@@ -1,20 +1,18 @@
-import React, {useState} from "react";
+import React, {useContext, useState} from "react";
 import {Select, TextInput, Button } from "grommet";
-import currencies from "../data/currencies";
-// todo:
-// get all supported currencies from 
-// https://api.exchangerate.host/symbols
-import Payments from "./Payments";
+import CurrenciesContext from "../data/CurrenciesContext";
+import PaymentsView from "./PaymentsView";
 import './Main.css';
-
 
 function Main() {
     const [foreingCurrency, setForeingCurrency] = useState('USD');
     const [foreingAmount, setForeingAmount] = useState(0);
-    const [homeAmount, setHomeAmount] = useState(0);
+    const [homeAmount, setHomeAmount] = useState("");
+    const homeCurrency = "GBP";
+    const currencies = useContext(CurrenciesContext);
 
     function convert(){
-        fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`)
+        fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=${homeCurrency}&amount=${foreingAmount}`)
         .then(response => response.json())
         .then(data => setHomeAmount(data.result));
     }
@@ -56,7 +54,7 @@ function Main() {
                         onClick={convert}
                     /> 
             </section>
-            <Payments />
+            <PaymentsView />
         </main>
     )
 }
