@@ -6,7 +6,7 @@ import Footer from './components/Footer';
 
 import { Grommet } from 'grommet';
 import {useEffect, useState} from "react";
-import CurrenciesContext from './data/CorrenciesContext';
+import CurrenciesContext from './data/CurrenciesContext';
 
 function App() {
 

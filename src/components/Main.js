@@ -1,23 +1,23 @@
-import React, {useState} from "react";
-import {Select, TextInput, Button, Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
-import payments from "../data/payments";
+import React, {useContext, useState} from "react";
+import {Select, TextInput, Button } from "grommet";
+import CurrenciesContext from "../data/CurrenciesContext";
+import PaymentsView from "./PaymentsView";
 import './Main.css';
-import {useContext} from "react";
-import CurrenciesContext from "../data/CorrenciesContext";
 
-const Main = () => {
+function Main() {
     const [foreingCurrency, setForeingCurrency] = useState('USD');
     const [foreingAmount, setForeingAmount] = useState(0);
-    const [homeAmount, setHomeAmount] = useState('???');
+    const [homeAmount, setHomeAmount] = useState("");
+    const homeCurrency = "GBP";
     const currencies = useContext(CurrenciesContext);
 
-    function convert(){
-        fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`)
+    const convert = () => {
+        fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=${homeCurrency}&amount=${foreingAmount}`)
         .then(response => response.json())
         .then(data => setHomeAmount(data.result));
     }
 
-    function handleChangeForeingAmount(event){
+    const handleChangeForeingAmount = (event) => {
         if(Number(event.target.value) || event.target.value === ''){
             setForeingAmount(event.target.value);
         }
@@ -27,8 +27,8 @@ const Main = () => {
     }
 
     return (
-            <main className="calculator-and-payments">
-             <section className="calc-section">
+        <main className="calculator-and-payments">
+            <section className="calc-section">
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
                             <Select className="convert-select"
@@ -52,55 +52,10 @@ const Main = () => {
                     </div>
                     <Button primary label="CALCULATE"
                         onClick={convert}
-                     />
-                </section>
-                <section className="payments-section">
-                    <h2 className="payments-title">Payments</h2>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                            <TableCell scope="col" border="bottom">
-                                <strong>Date</strong>
-                            </TableCell>
-                            <TableCell scope="col" border="bottom">
-                                <strong>Cur</strong>
-                            </TableCell>
-                            <TableCell scope="col" border="bottom">
-                                <strong>Amount</strong>
-                            </TableCell>
-                            <TableCell scope="col" border="bottom">
-                                <strong>Description</strong>
-                            </TableCell>
-                            <TableCell scope="col" border="bottom">
-                                <strong>Status</strong>
-                            </TableCell>
-                            <TableCell scope="col" border="bottom">
-                                <strong>Action</strong>
-                            </TableCell>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                                {payments.map((payment, idx) => {
-                                    return(
-                                        <TableRow key = {idx}>
-                                        <TableCell>{payment.date}</TableCell>
-                                        <TableCell>{payment.currency}</TableCell>
-                                        <TableCell>{payment.amount}</TableCell>
-                                        <TableCell>{payment.description}</TableCell>
-                                        <TableCell>{payment.status}</TableCell>
-                                        </TableRow>
-                                    )
-                                })}
-                                <TableRow>
-                                <TableCell></TableCell>
-                                <TableCell></TableCell>
-                                <TableCell><strong>???</strong></TableCell>
-                                <TableCell scope="row"><strong>Total (GBP)</strong></TableCell>
-                            </TableRow>
-                        </TableBody>
-                    </Table>
-                    </section>
-            </main>
+                    /> 
+            </section>
+            <PaymentsView />
+        </main>
     )
 }
 
