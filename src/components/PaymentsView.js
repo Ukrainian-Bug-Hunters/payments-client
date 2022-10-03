@@ -5,7 +5,7 @@ import payments from "../data/payments";
 
 function PaymentsView() {
     const [activeTabIndex, setActiveTabIndex] = useState(0);
-    const tabNames = ["All Payments", "Completed", "Pending", "Cancelled"];
+    const tabNames = ["All Payments", "Complete", "Pending", "Cancelled"];
 
     return (
         <section className="payments-section">
@@ -19,7 +19,7 @@ function PaymentsView() {
                     </Tab>
                     
                     <Tab title={tabNames[1]}>
-                        <Box margin="small">8
+                        <Box margin="small">
                             <PaymentsTable payments = {
                                 payments.filter(payment => payment.status === tabNames[1])
                             }/>
