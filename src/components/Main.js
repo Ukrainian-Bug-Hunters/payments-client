@@ -11,13 +11,13 @@ function Main() {
     const homeCurrency = "GBP";
     const currencies = useContext(CurrenciesContext);
 
-    function convert(){
+    const convert = () => {
         fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=${homeCurrency}&amount=${foreingAmount}`)
         .then(response => response.json())
         .then(data => setHomeAmount(data.result));
     }
 
-    function handleChangeForeingAmount(event){
+    const handleChangeForeingAmount = (event) => {
         if(Number(event.target.value) || event.target.value === ''){
             setForeingAmount(event.target.value);
         }
