@@ -1,30 +1,55 @@
-import React, {useState} from "react";
+import React, { useState, useContext, useRef } from "react";
 import {Select, TextInput, Button, Table, TableHeader, TableRow, TableCell, TableBody } from "grommet";
 import payments from "../data/payments";
 import './Main.css';
-import {useContext} from "react";
 import CurrenciesContext from "../data/CorrenciesContext";
+import MakePaymentWindow from "./MakePaymentWindow";
 
-const Main = () => {
-    const [foreingCurrency, setForeingCurrency] = useState('USD');
-    const [foreingAmount, setForeingAmount] = useState(0);
-    const [homeAmount, setHomeAmount] = useState('???');
+function Main() {
+    const [paymentsData, setPaymentsData] = useState(payments);
     const currencies = useContext(CurrenciesContext);
+    
+    const homeCurrency = "GBP";
+    const [homeAmount, setHomeAmount] = useState("");
+    
+    const [foreignCurrency, setForeignCurrency] = useState('USD');
+    const [foreignAmount, setForeignAmount] = useState("");
+    
+    const [showPaymentWindow, setShowPaymentWindow] = useState(false);
 
-    function convert(){
-        fetch(`https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`)
+    const payment = useRef({});
+    
+    const convert = () => {
+        fetch(`https://api.exchangerate.host/convert?from=${foreignCurrency}&to=${homeCurrency}&amount=${foreignAmount}`)
         .then(response => response.json())
-        .then(data => setHomeAmount(data.result));
+        .then(data => {
+
+            payment.current = {
+                    date: data.date,
+                    foreignCurrency: foreignCurrency,
+                    foreignAmount: data.query.amount,
+                    homeCurrency: homeCurrency,
+                    homeAmount: data.result,
+                    exchangeRate: data.info.rate
+            };
+            
+            setHomeAmount(data.result);
+        });
     }
 
-    function handleChangeForeingAmount(event){
+    const handleChangeforeignAmount = (event) => {
         if(Number(event.target.value) || event.target.value === ''){
-            setForeingAmount(event.target.value);
+            setForeignAmount(event.target.value);
         }
         else{
-            event.target.value = foreingAmount;
+            event.target.value = foreignAmount;
         }
     }
+
+    const submitedPayment = (payment) => {
+        setPaymentsData([...paymentsData, payment]);
+    }
+
 
     return (
             <main className="calculator-and-payments">
@@ -32,20 +57,20 @@ const Main = () => {
                 <h2 className="calc-title">Calculate payment in GBP</h2>
                     <div className="calc-data-container">
                             <Select className="convert-select"
-                                options={ Object.keys(currencies) }
-                                value={foreingCurrency}
-                                onChange={({currency}) => setForeingCurrency(currency)}
+                                options={ Object.keys(currencies).sort() }
+                                value={foreignCurrency}
+                                onChange={(currency) => setForeignCurrency(currency.target.value)}
                             />
                             <TextInput className="calc-text-input"
                                 placeholder="type here"
                                 onChange={(event) => {
-                                    handleChangeForeingAmount(event);
+                                    handleChangeforeignAmount(event);
                                 }}
 
                             />
                         <div className="calc-res">is worth</div>
-                            <TextInput className="calc-text-input" readOnly
-                                placeholder="type here"
+                            <TextInput className="calc-text-input" 
+                                readOnly
                                 value={homeAmount}
                             />
                         <div>in GBP.</div>
@@ -53,6 +78,9 @@ const Main = () => {
                     <Button primary label="CALCULATE"
                         onClick={convert}
                      />
+                    <Button primary label="Make Payment" 
+                        onClick={() => setShowPaymentWindow(true)}
+                    />
                 </section>
                 <section className="payments-section">
                     <h2 className="payments-title">Payments</h2>
@@ -80,7 +108,7 @@ const Main = () => {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                                {payments.map((payment, idx) => {
+                                {paymentsData.map((payment, idx) => {
                                     return(
                                         <TableRow key = {idx}>
                                         <TableCell>{payment.date}</TableCell>
@@ -91,7 +119,7 @@ const Main = () => {
                                         </TableRow>
                                     )
                                 })}
-                                <TableRow>
+                            <TableRow>
                                 <TableCell></TableCell>
                                 <TableCell></TableCell>
                                 <TableCell><strong>???</strong></TableCell>
@@ -100,6 +128,11 @@ const Main = () => {
                         </TableBody>
                     </Table>
                     </section>
+                    {showPaymentWindow &&   <MakePaymentWindow 
+                                                submitPayment={submitedPayment} 
+                                                closeWindow={setShowPaymentWindow}
+                                                paymentDetails={payment.current}
+                                            />}
             </main>
     )
 }

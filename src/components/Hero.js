@@ -8,8 +8,8 @@ import "./Hero.css";
 const Hero = () => {
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
+  const [homeAmount, setHomeAmount] = useState(872.43);
 
-  const homeAmount = 87.43;
   const homeCurrency = "GBP";
   const homeCurrencySymbol = '\u00A3';
   
@@ -45,7 +45,7 @@ const Hero = () => {
         <span>
           <Select
             className="convert-select"
-            options={ Object.keys(currencies) }
+            options={ Object.keys(currencies).sort() }
             value={foreignCurrency}
             onChange={(e) => {
               handleChangeCurrency(e.target.value);
