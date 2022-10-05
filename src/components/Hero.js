@@ -1,18 +1,16 @@
 import { React, useState, useEffect } from "react";
 import { Select } from "grommet";
-
-import {useContext} from "react";
+import store from "./Store";
+import { useContext } from "react";
 import CurrenciesContext from "../data/CurrenciesContext";
 import "./Hero.css";
 
 const Hero = () => {
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
-  const [homeAmount, setHomeAmount] = useState(872.43);
-
   const homeCurrency = "GBP";
-  const homeCurrencySymbol = '\u00A3';
-  
+  const homeCurrencySymbol = "\u00A3";
+  const homeAmount = store.getState().balance;
   const currencies = useContext(CurrenciesContext);
 
   const handleChangeCurrency = (currency) => {
@@ -45,7 +43,7 @@ const Hero = () => {
         <span>
           <Select
             className="convert-select"
-            options={ Object.keys(currencies).sort() }
+            options={Object.keys(currencies).sort()}
             value={foreignCurrency}
             onChange={(e) => {
               handleChangeCurrency(e.target.value);
