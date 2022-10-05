@@ -2,7 +2,7 @@ import { React, useState, useEffect } from "react";
 import { Select } from "grommet";
 
 import {useContext} from "react";
-import CurrenciesContext from "../data/CorrenciesContext";
+import CurrenciesContext from "../data/CurrenciesContext";
 import "./Hero.css";
 
 const Hero = () => {
