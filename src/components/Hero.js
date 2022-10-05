@@ -1,17 +1,16 @@
-import { React, useState, useEffect } from "react";
-import { Select } from "grommet";
-import store from "./Store";
-import { useContext } from "react";
+import { React, useState, useEffect, useContext } from "react";
+import { Select, Text } from "grommet";
 import CurrenciesContext from "../data/CurrenciesContext";
+import BalanceContext from "../data/BalanceContext";
+import store from "./Store";
 import "./Hero.css";
 
 const Hero = () => {
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
-  const homeCurrency = "GBP";
-  const homeCurrencySymbol = "\u00A3";
-  const homeAmount = store.getState().balance;
+  
   const currencies = useContext(CurrenciesContext);
+  const balance  = useContext(BalanceContext);
 
   const handleChangeCurrency = (currency) => {
     setForeignCurrency(currency);
@@ -27,16 +26,29 @@ const Hero = () => {
     }
   };
 
+  const getPendingAmont = () => {
+    const pendingPayments = store.getState().payments.filter(({status}) => status ==="Pending");
+    
+    const totalPendingAmount = pendingPayments.reduce((total, thisPayment) => {
+      return total += thisPayment.amount * thisPayment.exchangeRate;
+    }, 0);
+
+    return totalPendingAmount;
+  };
+
   useEffect(() => {
-    const requestURL = `https://api.exchangerate.host/convert?from=${homeCurrency}&to=${foreignCurrency}&amount=${homeAmount}`;
+    const requestURL = `https://api.exchangerate.host/convert?from=${balance.currency}&to=${foreignCurrency}&amount=${balance.amount}`;
     fetchData(requestURL);
-  }, [foreignCurrency, homeAmount]);
+  }, [foreignCurrency, balance]);
 
   return (
     <div className="balance-container">
       <h2 className="balance-title">Your account balance is</h2>
       <span className="balance-value">
-        {homeCurrencySymbol} {homeAmount}
+        {balance.currencySymbol} {balance.amount}
+      </span>
+      <span>
+      <Text size="small" color="red">Available amount: {`${balance.currencySymbol} ${balance.amount - getPendingAmont()}`}</Text>
       </span>
       <p className="balance-convert">
         Your balance is <span>{foreignAmount}</span> in{" "}

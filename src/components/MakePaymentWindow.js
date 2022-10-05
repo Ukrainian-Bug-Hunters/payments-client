@@ -1,21 +1,38 @@
-import React, { useState } from "react";
-import { Layer, Button, TextInput } from "grommet";
+import React, { useState, useContext, useEffect } from "react";
+import { Layer, Button, TextInput, Text } from "grommet";
 import "./MakePaymentWindow.css";
-import store, { addPayment, decreaseAmount } from "./Store";
+import store, { addPayment } from "./Store";
+import BalanceContext from "../data/BalanceContext";
 
 export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
+  const balance  = useContext(BalanceContext);
   const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
+  
+  const [homeAmount, setHomeAmount] = useState(paymentDetails?.homeAmount || 0);
+  const homeCurrency = paymentDetails?.homeCurrency || balance.currency;
   const foreignCurrency = paymentDetails?.foreignCurrency || "USD";
-  const homeCurrency = paymentDetails?.homeCurrency || "GBP";
+  const [foreignAmount, setForeignAmount] = useState(paymentDetails?.foreignAmount || 0);
   const exchangeRate = paymentDetails?.exchangeRate || 0;
-
   const [description, setDescription] = useState("");
 
-  const [foreignAmount, setForeignAmount] = useState(
-    paymentDetails?.foreignAmount || 0
-  );
-  const [homeAmount, setHomeAmount] = useState(paymentDetails?.homeAmount || 0);
+  const [amountAvailable, setAmountAvailable] = useState("");
 
+  useEffect(() => {
+    const pendingAmount = getPendingAmont();
+    setAmountAvailable(balance.amount - pendingAmount);
+
+  }, [homeAmount, balance]);
+
+  const getPendingAmont = () => {
+    const pendingPayments = store.getState().payments.filter(({status}) => status ==="Pending");
+    
+    const totalPendingAmount = pendingPayments.reduce((total, thisPayment) => {
+      return total += thisPayment.amount * thisPayment.exchangeRate;
+    }, 0);
+
+    return totalPendingAmount;
+  };
+  
   const onClose = () => {
     closeWindow(false);
   };
@@ -52,6 +69,17 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
     return false;
   };
 
+  const handleAddPayment = (payment) => {
+    const pendingAmount = getPendingAmont()
+
+    if(pendingAmount + homeAmount > balance.amount) {
+      alert(`You've got not enough money, dude!\nAvailable balance is ${balance.amount - pendingAmount}`);
+      return;
+    }
+    store.dispatch(addPayment(payment));
+    onClose();
+  };
+
   return (
     <Layer onEsc={() => onClose} onClickOutside={onClose}>
       <div className="payment-window">
@@ -76,7 +104,9 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
               value={homeAmount}
               onChange={handleAmountUpdate}
             />
+            
           </div>
+          <Text size="small" color="red">Available amount: {amountAvailable}</Text>
           <h2>ExchangeRate: {exchangeRate}</h2>
           <div className="description-box">
             <h2>Description:</h2>
@@ -93,18 +123,15 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
             label="Submit"
             size="large"
             onClick={() => {
-              store.dispatch(
-                addPayment({
-                  date: date,
-                  currency: foreignCurrency,
-                  amount: foreignAmount,
-                  exchangeRate: exchangeRate,
-                  description: description,
-                  status: "Pending",
-                }),
-                store.dispatch(decreaseAmount(foreignAmount)),
-                onClose()
-              );
+              const payment = {
+                date: date,
+                currency: foreignCurrency,
+                amount: foreignAmount,
+                exchangeRate: exchangeRate,
+                description: description,
+                status: "Pending",
+              };
+              handleAddPayment(payment);
             }}
           />
         </div>

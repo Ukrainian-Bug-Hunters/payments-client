@@ -4,11 +4,13 @@ import Hero from "./components/Hero";
 import Main from "./components/Main";
 import Footer from "./components/Footer";
 import { Grommet } from "grommet";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import CurrenciesContext from "./data/CurrenciesContext";
+import BalanceContext from "./data/BalanceContext";
 
 function App() {
   const [currencies, setCurrencies] = useState({});
+  const balance = useContext(BalanceContext);
 
   useEffect(() => {
     fetch("https://api.exchangerate.host/symbols")
@@ -18,12 +20,14 @@ function App() {
 
   return (
     <CurrenciesContext.Provider value={currencies}>
-      <Grommet>
-        <Header />
-        <Hero />
-        <Main />
-        <Footer />
-      </Grommet>
+      <BalanceContext.Provider value={balance}>
+        <Grommet>
+          <Header />
+          <Hero />
+          <Main />
+          <Footer />
+        </Grommet>
+      </BalanceContext.Provider>
     </CurrenciesContext.Provider>
   );
 }
