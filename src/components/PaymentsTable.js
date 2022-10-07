@@ -10,8 +10,24 @@ import {
 import store, { cancelPayment } from "./Store";
 
 function PaymentsTable({ payments }) {
+  const homeCurrency = 'GBP';
+  const homeAmounts = [];
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
+
+  const calculateHomeAmount = (amount, exchangeRate) => {
+    const homeAmount = Math.round(((amount / exchangeRate) + Number.EPSILON) * 100) / 100;
+      homeAmounts.push(homeAmount);
+    return homeAmount;
+  }
+
+  const calculateTotalhomeAmount = () => {
+    const totalhomeAmount = Math.round(((
+      homeAmounts.reduce((total, currentAmount) => 
+        total = total + currentAmount, 0)) + Number.EPSILON) * 100) / 100;
+    return totalhomeAmount;
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -24,6 +40,9 @@ function PaymentsTable({ payments }) {
           </TableCell>
           <TableCell scope="col" border="bottom">
             <strong>Amount</strong>
+          </TableCell>
+          <TableCell scope="col" border="bottom">
+            <strong>{homeCurrency}</strong>
           </TableCell>
           <TableCell scope="col" border="bottom">
             <strong>Description</strong>
@@ -43,6 +62,7 @@ function PaymentsTable({ payments }) {
               <TableCell>{payment.date}</TableCell>
               <TableCell>{payment.currency}</TableCell>
               <TableCell>{payment.amount}</TableCell>
+              <TableCell>{calculateHomeAmount(payment.amount, payment.exchangeRate)}</TableCell>
               <TableCell>{payment.description}</TableCell>
               <TableCell>{payment.status}</TableCell>
               <TableCell>
@@ -64,11 +84,14 @@ function PaymentsTable({ payments }) {
           );
         })}
         <TableRow>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
           <TableCell>
-            <strong>???</strong>
+            <strong>{calculateTotalhomeAmount()}</strong>
           </TableCell>
           <TableCell scope="row">
-            <strong>Total (GBP)</strong>
+            <strong>Total ({homeCurrency})</strong>
           </TableCell>
         </TableRow>
       </TableBody>
