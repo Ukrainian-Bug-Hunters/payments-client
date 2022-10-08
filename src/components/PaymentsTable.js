@@ -16,15 +16,14 @@ function PaymentsTable({ payments }) {
   const forceUpdate = useCallback(() => updateState({}), []);
 
   const calculateHomeAmount = (amount, exchangeRate) => {
-    const homeAmount = Math.round(((amount / exchangeRate) + Number.EPSILON) * 100) / 100;
+    const homeAmount = Math.round(amount / exchangeRate * 100) / 100;
       homeAmounts.push(homeAmount);
     return homeAmount;
   }
 
   const calculateTotalhomeAmount = () => {
-    const totalhomeAmount = Math.round(((
-      homeAmounts.reduce((total, currentAmount) => 
-        total = total + currentAmount, 0)) + Number.EPSILON) * 100) / 100;
+    const totalhomeAmount = Math.round(
+      homeAmounts.reduce((total, currentAmount) => total = total + currentAmount, 0) * 100) / 100;
     return totalhomeAmount;
   }
 
