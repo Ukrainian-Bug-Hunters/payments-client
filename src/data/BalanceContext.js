@@ -2,7 +2,7 @@ import { createContext } from "react";
 
 const BalanceContext = createContext({
   amount: 87.43,
-  currency: "GPB",
+  currency: "GBP",
   currencySymbol: '\u00A3',
 });
 

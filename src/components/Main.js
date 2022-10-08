@@ -3,15 +3,16 @@ import { Select, TextInput, Button } from "grommet";
 import CurrenciesContext from "../data/CurrenciesContext";
 import PaymentsView from "./PaymentsView";
 import "./Main.css";
+import BalanceContext from "../data/BalanceContext";
 
 function Main() {
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
   const [homeAmount, setHomeAmount] = useState("");
-  const homeCurrency = "GBP";
+  const balance  = useContext(BalanceContext);
+  const homeCurrency = balance.currency;
   const currencies = useContext(CurrenciesContext);
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
-
   const payment = useRef({});
 
   const convert = () => {
