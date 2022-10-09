@@ -15,6 +15,10 @@ function PaymentsTable({ payments }) {
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
 
+  const getKey = ({date, currency, amount, status}) => {
+    return `${date}-${currency}-${amount}-${status}`;
+  }
+
   const calculateHomeAmount = (amount, exchangeRate) => {
     const homeAmount = Math.round(amount / exchangeRate * 100) / 100;
       homeAmounts.push(homeAmount);
@@ -55,9 +59,9 @@ function PaymentsTable({ payments }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {payments.map((payment, idx) => {
+        {payments.map((payment) => {
           return (
-            <TableRow key={idx}>
+            <TableRow key={getKey(payment)}>
               <TableCell>{payment.date}</TableCell>
               <TableCell>{payment.currency}</TableCell>
               <TableCell>{payment.amount}</TableCell>
