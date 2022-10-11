@@ -11,7 +11,6 @@ import store, { cancelPayment } from "./Store";
 
 function PaymentsTable({ payments }) {
   const homeCurrency = 'GBP';
-  const homeAmounts = [];
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
 
@@ -21,13 +20,13 @@ function PaymentsTable({ payments }) {
 
   const calculateHomeAmount = (amount, exchangeRate) => {
     const homeAmount = Math.round(amount / exchangeRate * 100) / 100;
-      homeAmounts.push(homeAmount);
     return homeAmount;
   }
 
   const calculateTotalhomeAmount = () => {
     const totalhomeAmount = Math.round(
-      homeAmounts.reduce((total, currentAmount) => total = total + currentAmount, 0) * 100) / 100;
+      payments.reduce((total, payment) => 
+        total = total + calculateHomeAmount(payment.amount, payment.exchangeRate), 0) * 100) / 100;
     return totalhomeAmount;
   }
 
