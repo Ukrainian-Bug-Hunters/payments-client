@@ -10,8 +10,26 @@ import {
 import store, { cancelPayment } from "./Store";
 
 function PaymentsTable({ payments }) {
+  const homeCurrency = 'GBP';
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
+
+  const getKey = ({date, currency, amount, status}) => {
+    return `${date}-${currency}-${amount}-${status}`;
+  }
+
+  const calculateHomeAmount = ({amount, exchangeRate}) => {
+    const homeAmount = Math.round(amount / exchangeRate * 100) / 100;
+    return homeAmount;
+  }
+
+  const calculateTotalhomeAmount = () => {
+    const totalhomeAmount = Math.round(
+      payments.reduce((total, payment) => 
+        total = total + calculateHomeAmount(payment), 0) * 100) / 100;
+    return totalhomeAmount;
+  }
+
   return (
     <Table>
       <TableHeader>
@@ -26,6 +44,9 @@ function PaymentsTable({ payments }) {
             <strong>Amount</strong>
           </TableCell>
           <TableCell scope="col" border="bottom">
+            <strong>{homeCurrency}</strong>
+          </TableCell>
+          <TableCell scope="col" border="bottom">
             <strong>Description</strong>
           </TableCell>
           <TableCell scope="col" border="bottom">
@@ -37,12 +58,13 @@ function PaymentsTable({ payments }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {payments.map((payment, idx) => {
+        {payments.map((payment) => {
           return (
-            <TableRow key={idx}>
+            <TableRow key={getKey(payment)}>
               <TableCell>{payment.date}</TableCell>
               <TableCell>{payment.currency}</TableCell>
               <TableCell>{payment.amount}</TableCell>
+              <TableCell>{calculateHomeAmount(payment)}</TableCell>
               <TableCell>{payment.description}</TableCell>
               <TableCell>{payment.status}</TableCell>
               <TableCell>
@@ -64,11 +86,14 @@ function PaymentsTable({ payments }) {
           );
         })}
         <TableRow>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
+          <TableCell></TableCell>
           <TableCell>
-            <strong>???</strong>
+            <strong>{calculateTotalhomeAmount()}</strong>
           </TableCell>
           <TableCell scope="row">
-            <strong>Total (GBP)</strong>
+            <strong>Total ({homeCurrency})</strong>
           </TableCell>
         </TableRow>
       </TableBody>
