@@ -18,7 +18,7 @@ function PaymentsTable({ payments }) {
     return `${date}-${currency}-${amount}-${status}`;
   }
 
-  const calculateHomeAmount = (amount, exchangeRate) => {
+  const calculateHomeAmount = ({amount, exchangeRate}) => {
     const homeAmount = Math.round(amount / exchangeRate * 100) / 100;
     return homeAmount;
   }
@@ -26,7 +26,7 @@ function PaymentsTable({ payments }) {
   const calculateTotalhomeAmount = () => {
     const totalhomeAmount = Math.round(
       payments.reduce((total, payment) => 
-        total = total + calculateHomeAmount(payment.amount, payment.exchangeRate), 0) * 100) / 100;
+        total = total + calculateHomeAmount(payment), 0) * 100) / 100;
     return totalhomeAmount;
   }
 
@@ -64,7 +64,7 @@ function PaymentsTable({ payments }) {
               <TableCell>{payment.date}</TableCell>
               <TableCell>{payment.currency}</TableCell>
               <TableCell>{payment.amount}</TableCell>
-              <TableCell>{calculateHomeAmount(payment.amount, payment.exchangeRate)}</TableCell>
+              <TableCell>{calculateHomeAmount(payment)}</TableCell>
               <TableCell>{payment.description}</TableCell>
               <TableCell>{payment.status}</TableCell>
               <TableCell>
