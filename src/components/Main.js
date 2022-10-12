@@ -1,49 +1,46 @@
-import React, { useState } from "react";
-import {
-  Select,
-  TextInput,
-  Button,
-  Table,
-  TableHeader,
-  TableRow,
-  TableCell,
-  TableBody,
-} from "grommet";
-import currencies from "../data/currencies";
-// todo:
-// get all supported currencies from
-// https://api.exchangerate.host/symbols
-import payments from "../data/payments";
+import React, { useContext, useState, useRef } from "react";
+import { Select, TextInput, Button } from "grommet";
+import CurrenciesContext from "../data/CurrenciesContext";
+import PaymentsView from "./PaymentsView";
 import "./Main.css";
+import BalanceContext from "../data/BalanceContext";
 
-const Main = () => {
-  const [foreingCurrency, setForeingCurrency] = useState("USD");
-  const [foreingAmount, setForeingAmount] = useState(0);
-  const [homeAmount, setHomeAmount] = useState("???");
+function Main() {
+  const [foreignCurrency, setForeignCurrency] = useState("USD");
+  const [foreignAmount, setForeignAmount] = useState(0);
+  const [homeAmount, setHomeAmount] = useState("");
+  const balance = useContext(BalanceContext);
+  const homeCurrency = balance.currency;
+  const currencies = useContext(CurrenciesContext);
+  const [showPaymentWindow, setShowPaymentWindow] = useState(false);
+  const payment = useRef({});
 
-  const allowPayments = (accountBalance, paymentAmount, makePayment) => {
-    accountBalance > paymentAmount
-      ? makePayment()
-      : alert(
-          `The transaction amount exceeds your account balance! Account Balance: ${accountBalance}`
-        );
-  };
-
-  function convert() {
+  const convert = () => {
     fetch(
-      `https://api.exchangerate.host/convert?from=${foreingCurrency}&to=GBP&amount=${foreingAmount}`
+      `https://api.exchangerate.host/convert?from=${foreignCurrency}&to=${homeCurrency}&amount=${foreignAmount}`
     )
       .then((response) => response.json())
-      .then((data) => setHomeAmount(data.result));
-  }
+      .then((data) => {
+        payment.current = {
+          date: data.date,
+          foreignCurrency: foreignCurrency,
+          foreignAmount: data.query.amount,
+          homeCurrency: homeCurrency,
+          homeAmount: data.result,
+          exchangeRate: data.info.rate,
+        };
 
-  function handleChangeForeingAmount(event) {
+        setHomeAmount(data.result);
+      });
+  };
+
+  const handleChangeForeignAmount = (event) => {
     if (Number(event.target.value) || event.target.value === "") {
-      setForeingAmount(event.target.value);
+      setForeignAmount(event.target.value);
     } else {
-      event.target.value = foreingAmount;
+      event.target.value = foreignAmount;
     }
-  }
+  };
 
   return (
     <main className="calculator-and-payments">
@@ -52,15 +49,15 @@ const Main = () => {
         <div className="calc-data-container">
           <Select
             className="convert-select"
-            options={currencies}
-            value={foreingCurrency}
-            onChange={({ currency }) => setForeingCurrency(currency)}
+            options={Object.keys(currencies)}
+            value={foreignCurrency}
+            onChange={({ currency }) => setForeignCurrency(currency)}
           />
           <TextInput
             className="calc-text-input"
             placeholder="type here"
             onChange={(event) => {
-              handleChangeForeingAmount(event);
+              handleChangeForeignAmount(event);
             }}
           />
           <div className="calc-res">is worth</div>
@@ -73,59 +70,19 @@ const Main = () => {
           <div>in GBP.</div>
         </div>
         <Button primary label="CALCULATE" onClick={convert} />
+        <Button
+          primary
+          label="Make Payment"
+          onClick={() => setShowPaymentWindow(true)}
+        />
       </section>
-      <section className="payments-section">
-        <h2 className="payments-title">Payments</h2>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableCell scope="col" border="bottom">
-                <strong>Date</strong>
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                <strong>Cur</strong>
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                <strong>Amount</strong>
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                <strong>Description</strong>
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                <strong>Status</strong>
-              </TableCell>
-              <TableCell scope="col" border="bottom">
-                <strong>Action</strong>
-              </TableCell>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {payments.map((payment, idx) => {
-              return (
-                <TableRow key={idx}>
-                  <TableCell>{payment.date}</TableCell>
-                  <TableCell>{payment.currency}</TableCell>
-                  <TableCell>{payment.amount}</TableCell>
-                  <TableCell>{payment.description}</TableCell>
-                  <TableCell>{payment.status}</TableCell>
-                </TableRow>
-              );
-            })}
-            <TableRow>
-              <TableCell></TableCell>
-              <TableCell></TableCell>
-              <TableCell>
-                <strong>???</strong>
-              </TableCell>
-              <TableCell scope="row">
-                <strong>Total (GBP)</strong>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </section>
+      <PaymentsView
+        setShowPaymentWindow={setShowPaymentWindow}
+        showPaymentWindow={showPaymentWindow}
+        payment={payment.current}
+      />
     </main>
   );
-};
+}
 
 export default Main;
