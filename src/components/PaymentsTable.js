@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useContext } from "react";
 import {
   Table,
   TableHeader,
@@ -8,27 +8,32 @@ import {
   Button,
 } from "grommet";
 import store, { cancelPayment } from "./Store";
+import BalanceContext from "../data/BalanceContext";
 
 function PaymentsTable({ payments }) {
-  const homeCurrency = 'GBP';
+  const homeCurrency = useContext(BalanceContext).currency;
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
 
-  const getKey = ({date, currency, amount, status}) => {
+  const getKey = ({ date, currency, amount, status }) => {
     return `${date}-${currency}-${amount}-${status}`;
-  }
+  };
 
-  const calculateHomeAmount = ({amount, exchangeRate}) => {
-    const homeAmount = Math.round(amount / exchangeRate * 100) / 100;
+  const calculateHomeAmount = ({ amount, exchangeRate }) => {
+    const homeAmount = Math.round((amount / exchangeRate) * 100) / 100;
     return homeAmount;
-  }
+  };
 
   const calculateTotalhomeAmount = () => {
-    const totalhomeAmount = Math.round(
-      payments.reduce((total, payment) => 
-        total = total + calculateHomeAmount(payment), 0) * 100) / 100;
+    const totalhomeAmount =
+      Math.round(
+        payments.reduce(
+          (total, payment) => (total = total + calculateHomeAmount(payment)),
+          0
+        ) * 100
+      ) / 100;
     return totalhomeAmount;
-  }
+  };
 
   return (
     <Table>

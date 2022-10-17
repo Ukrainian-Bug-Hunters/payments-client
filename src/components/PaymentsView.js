@@ -51,7 +51,6 @@ function PaymentsView(props) {
                   payments={payments.filter(
                     (payment) => payment.status === tabNames[3]
                   )}
-                  store={store}
                 />
               </Box>
             </Tab>
