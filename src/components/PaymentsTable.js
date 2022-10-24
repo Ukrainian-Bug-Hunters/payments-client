@@ -11,7 +11,8 @@ import store, { cancelPayment } from "./Store";
 import BalanceContext from "../data/BalanceContext";
 
 function PaymentsTable({ payments }) {
-  const homeCurrency = useContext(BalanceContext).currency;
+  const balance = useContext(BalanceContext);
+  const homeCurrency = balance.currency;
   const [, updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
 
@@ -20,19 +21,15 @@ function PaymentsTable({ payments }) {
   };
 
   const calculateHomeAmount = ({ amount, exchangeRate }) => {
-    const homeAmount = Math.round((amount / exchangeRate) * 100) / 100;
-    return homeAmount;
+    return Math.round((amount / exchangeRate) * 100) / 100;
   };
 
   const calculateTotalhomeAmount = () => {
-    const totalhomeAmount =
-      Math.round(
-        payments.reduce(
-          (total, payment) => (total = total + calculateHomeAmount(payment)),
-          0
-        ) * 100
-      ) / 100;
-    return totalhomeAmount;
+    const totalAmountHomeCurrency = payments.reduce((total, payment) => {
+        return total + calculateHomeAmount(payment);
+      }, 0);
+    
+    return Number(totalAmountHomeCurrency * 100 / 100).toFixed(2);
   };
 
   return (
