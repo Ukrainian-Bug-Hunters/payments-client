@@ -3,15 +3,34 @@ import { Layer, Button, TextInput, Text } from "grommet";
 import "./MakePaymentWindow.css";
 import store, { addPayment } from "./Store";
 import BalanceContext from "../data/BalanceContext";
+import noMoney from "../assets/noMoney.gif";
 
-export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
-  const balance  = useContext(BalanceContext);
+export default function MakePaymentWindow({
+  closeWindow,
+  paymentDetails,
+  socket,
+}) {
+  useEffect(() => {
+    socket.on("message", (data) => {
+      console.log(data);
+    });
+
+    socket.on("disconnect", () => {});
+  }, []);
+
+  const sendMessage = () => {
+    socket.emit("message", "New payment");
+  };
+
+  const balance = useContext(BalanceContext);
   const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
-  
+
   const [homeAmount, setHomeAmount] = useState(paymentDetails?.homeAmount || 0);
   const homeCurrency = paymentDetails?.homeCurrency || balance.currency;
   const foreignCurrency = paymentDetails?.foreignCurrency || "USD";
-  const [foreignAmount, setForeignAmount] = useState(paymentDetails?.foreignAmount || 0);
+  const [foreignAmount, setForeignAmount] = useState(
+    paymentDetails?.foreignAmount || 0
+  );
   const exchangeRate = paymentDetails?.exchangeRate || 0;
   const [description, setDescription] = useState("");
 
@@ -20,19 +39,20 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
   useEffect(() => {
     const pendingAmount = getPendingAmont();
     setAmountAvailable(balance.amount - pendingAmount);
-
   }, [homeAmount, balance]);
 
   const getPendingAmont = () => {
-    const pendingPayments = store.getState().payments.filter(({status}) => status ==="Pending");
-    
+    const pendingPayments = store
+      .getState()
+      .payments.filter(({ status }) => status === "Pending");
+
     const totalPendingAmount = pendingPayments.reduce((total, thisPayment) => {
-      return total += thisPayment.amount * thisPayment.exchangeRate;
+      return (total += thisPayment.amount * thisPayment.exchangeRate);
     }, 0);
 
     return totalPendingAmount;
   };
-  
+
   const onClose = () => {
     closeWindow(false);
   };
@@ -69,11 +89,12 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
     return false;
   };
 
-  const handleAddPayment = (payment) => {
-    const pendingAmount = getPendingAmont()
+  const [showNotEnoughMoney, setShowNotEnoughMoney] = useState(false);
 
-    if(pendingAmount + homeAmount > balance.amount) {
-      alert(`You've got not enough money, dude!\nAvailable balance is ${balance.amount - pendingAmount}`);
+  let pendingAmount = getPendingAmont();
+  const handleAddPayment = (payment) => {
+    if (pendingAmount + homeAmount > balance.amount) {
+      setShowNotEnoughMoney(true);
       return;
     }
     store.dispatch(addPayment(payment));
@@ -81,61 +102,82 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
   };
 
   return (
-    <Layer onEsc={() => onClose} onClickOutside={onClose}>
-      <div className="payment-window">
-        <h1 className="window-title">Enter payment details</h1>
-        <div className="input-fields">
-          <h2>Date: {date}</h2>
-          <div className="amount-line">
-            <h2>Amount ({foreignCurrency}):</h2>
-            <TextInput
-              id="foreign-amount"
-              placeholder="type here"
-              value={foreignAmount}
-              onChange={handleAmountUpdate}
+    <>
+      <Layer onEsc={() => onClose} onClickOutside={onClose}>
+        {!!showNotEnoughMoney ? (
+          <div className="notEnoughMoney-window">
+            <img src={noMoney} alt="no money gif" />
+            <h2>You have not enough money!</h2>
+            <h2>
+              Available balance is {balance.amount - pendingAmount}{" "}
+              {homeCurrency}
+            </h2>
+            <Button
+              primary
+              label="Back to payment"
+              size="large"
+              onClick={() => setShowNotEnoughMoney(false)}
             />
           </div>
+        ) : (
+          <div className="payment-window">
+            <h1 className="window-title">Enter payment details</h1>
+            <div className="input-fields">
+              <h2>Date: {date}</h2>
+              <div className="amount-line">
+                <h2>Amount ({foreignCurrency}):</h2>
+                <TextInput
+                  id="foreign-amount"
+                  placeholder="type here"
+                  value={foreignAmount}
+                  onChange={handleAmountUpdate}
+                />
+              </div>
 
-          <div className="amount-line">
-            <h2>Amount ({homeCurrency}):</h2>
-            <TextInput
-              id="home-amount"
-              placeholder="type here"
-              value={homeAmount}
-              onChange={handleAmountUpdate}
-            />
-            
+              <div className="amount-line">
+                <h2>Amount ({homeCurrency}):</h2>
+                <TextInput
+                  id="home-amount"
+                  placeholder="type here"
+                  value={homeAmount}
+                  onChange={handleAmountUpdate}
+                />
+              </div>
+              <Text size="small" color="red">
+                Available amount: {amountAvailable}
+              </Text>
+              <h2>ExchangeRate: {exchangeRate}</h2>
+              <div className="description-box">
+                <h2>Description:</h2>
+                <TextInput
+                  onChange={(event) => setDescription(event.target.value)}
+                  value={description}
+                />
+              </div>
+            </div>
+            <div className="buttons">
+              <Button primary label="Cancel" size="large" onClick={onClose} />
+              <Button
+                primary
+                label="Submit"
+                size="large"
+                onClick={() => {
+                  const payment = {
+                    date: date,
+                    currency: foreignCurrency,
+                    amount: foreignAmount,
+                    exchangeRate: exchangeRate,
+                    description: description,
+                    status: "Pending",
+                  };
+                  handleAddPayment(payment);
+                  sendMessage();
+                }}
+              />
+            </div>
           </div>
-          <Text size="small" color="red">Available amount: {amountAvailable}</Text>
-          <h2>ExchangeRate: {exchangeRate}</h2>
-          <div className="description-box">
-            <h2>Description:</h2>
-            <TextInput
-              onChange={(event) => setDescription(event.target.value)}
-              value={description}
-            />
-          </div>
-        </div>
-        <div className="buttons">
-          <Button primary label="Cancel" size="large" onClick={onClose} />
-          <Button
-            primary
-            label="Submit"
-            size="large"
-            onClick={() => {
-              const payment = {
-                date: date,
-                currency: foreignCurrency,
-                amount: foreignAmount,
-                exchangeRate: exchangeRate,
-                description: description,
-                status: "Pending",
-              };
-              handleAddPayment(payment);
-            }}
-          />
-        </div>
-      </div>
-    </Layer>
+        )}
+      </Layer>
+    </>
   );
 }

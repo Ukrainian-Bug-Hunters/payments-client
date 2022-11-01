@@ -1,13 +1,21 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Tab, Tabs } from "grommet";
 import PaymentsTable from "./PaymentsTable";
 import store from "./Store";
 import MakePaymentWindow from "./MakePaymentWindow";
+import io from "socket.io-client";
+const socket = io("http://localhost:5000");
 
 function PaymentsView(props) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const tabNames = ["All Payments", "Complete", "Pending", "Cancelled"];
   let payments = store.getState().payments;
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("connected with id: " + socket.id);
+    });
+  }, []);
 
   return (
     <>
@@ -51,7 +59,6 @@ function PaymentsView(props) {
                   payments={payments.filter(
                     (payment) => payment.status === tabNames[3]
                   )}
-                  store={store}
                 />
               </Box>
             </Tab>
@@ -60,6 +67,7 @@ function PaymentsView(props) {
       </section>
       {props.showPaymentWindow && (
         <MakePaymentWindow
+          socket={socket}
           closeWindow={props.setShowPaymentWindow}
           paymentDetails={props.payment}
         />

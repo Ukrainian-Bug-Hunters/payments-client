@@ -6,10 +6,10 @@ import "./Main.css";
 import BalanceContext from "../data/BalanceContext";
 
 function Main() {
+  const balance = useContext(BalanceContext);
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
   const [homeAmount, setHomeAmount] = useState("");
-  const balance  = useContext(BalanceContext);
   const homeCurrency = balance.currency;
   const currencies = useContext(CurrenciesContext);
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
@@ -45,7 +45,7 @@ function Main() {
   return (
     <main className="calculator-and-payments">
       <section className="calc-section">
-        <h2 className="calc-title">Calculate payment in GBP</h2>
+        <h2 className="calc-title">Calculate payment in {homeCurrency}</h2>
         <div className="calc-data-container">
           <Select
             className="convert-select"
@@ -67,7 +67,7 @@ function Main() {
             placeholder="type here"
             value={homeAmount}
           />
-          <div>in GBP.</div>
+          <div>in {homeCurrency}.</div>
         </div>
         <Button primary label="CALCULATE" onClick={convert} />
         <Button
