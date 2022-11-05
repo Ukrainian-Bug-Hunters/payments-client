@@ -5,23 +5,7 @@ import store, { addPayment } from "./Store";
 import BalanceContext from "../data/BalanceContext";
 import noMoney from "../assets/noMoney.gif";
 
-export default function MakePaymentWindow({
-  closeWindow,
-  paymentDetails,
-  socket,
-}) {
-  useEffect(() => {
-    socket.on("message", (data) => {
-      console.log(data);
-    });
-
-    socket.on("disconnect", () => {});
-  }, []);
-
-  const sendMessage = () => {
-    socket.emit("message", "New payment");
-  };
-
+export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
   const balance = useContext(BalanceContext);
   const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
 
@@ -171,7 +155,6 @@ export default function MakePaymentWindow({
                     status: "Pending",
                   };
                   handleAddPayment(payment);
-                  sendMessage();
                 }}
               />
             </div>

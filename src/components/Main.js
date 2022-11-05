@@ -4,8 +4,9 @@ import CurrenciesContext from "../data/CurrenciesContext";
 import PaymentsView from "./PaymentsView";
 import "./Main.css";
 import BalanceContext from "../data/BalanceContext";
+import MakePaymentWindow from "./MakePaymentWindow";
 
-function Main() {
+function Main({socket}) {
   const balance = useContext(BalanceContext);
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
@@ -43,45 +44,49 @@ function Main() {
   };
 
   return (
-    <main className="calculator-and-payments">
-      <section className="calc-section">
-        <h2 className="calc-title">Calculate payment in {homeCurrency}</h2>
-        <div className="calc-data-container">
-          <Select
-            className="convert-select"
-            options={Object.keys(currencies)}
-            value={foreignCurrency}
-            onChange={({ currency }) => setForeignCurrency(currency)}
+    <>
+      <main className="calculator-and-payments">
+        <section className="calc-section">
+          <h2 className="calc-title">Calculate payment in {homeCurrency}</h2>
+          <div className="calc-data-container">
+            <Select
+              className="convert-select"
+              options={Object.keys(currencies)}
+              value={foreignCurrency}
+              onChange={({ currency }) => setForeignCurrency(currency)}
+            />
+            <TextInput
+              className="calc-text-input"
+              placeholder="type here"
+              onChange={(event) => {
+                handleChangeForeignAmount(event);
+              }}
+            />
+            <div className="calc-res">is worth</div>
+            <TextInput
+              className="calc-text-input"
+              readOnly
+              placeholder="type here"
+              value={homeAmount}
+            />
+            <div>in {homeCurrency}.</div>
+          </div>
+          <Button primary label="CALCULATE" onClick={convert} />
+          <Button
+            primary
+            label="Make Payment"
+            onClick={() => setShowPaymentWindow(true)}
           />
-          <TextInput
-            className="calc-text-input"
-            placeholder="type here"
-            onChange={(event) => {
-              handleChangeForeignAmount(event);
-            }}
-          />
-          <div className="calc-res">is worth</div>
-          <TextInput
-            className="calc-text-input"
-            readOnly
-            placeholder="type here"
-            value={homeAmount}
-          />
-          <div>in {homeCurrency}.</div>
-        </div>
-        <Button primary label="CALCULATE" onClick={convert} />
-        <Button
-          primary
-          label="Make Payment"
-          onClick={() => setShowPaymentWindow(true)}
+        </section>
+        <PaymentsView socket={socket}/>
+      </main>
+      {showPaymentWindow && (
+        <MakePaymentWindow
+          closeWindow={setShowPaymentWindow}
+          paymentDetails={payment}
         />
-      </section>
-      <PaymentsView
-        setShowPaymentWindow={setShowPaymentWindow}
-        showPaymentWindow={showPaymentWindow}
-        payment={payment.current}
-      />
-    </main>
+      )}
+    </>
   );
 }
 

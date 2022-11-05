@@ -2,20 +2,38 @@ import { useState, useEffect } from "react";
 import { Box, Tab, Tabs } from "grommet";
 import PaymentsTable from "./PaymentsTable";
 import store from "./Store";
-import MakePaymentWindow from "./MakePaymentWindow";
-import io from "socket.io-client";
-const socket = io("http://localhost:5000");
 
-function PaymentsView(props) {
+function PaymentsView({ socket }) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const tabNames = ["All Payments", "Complete", "Pending", "Cancelled"];
-  let payments = store.getState().payments;
+  // let payments = store.getState().payments;
+  const [payments, setPayments] = useState(store.getState().payments);
 
   useEffect(() => {
-    socket.on("connect", () => {
-      console.log("connected with id: " + socket.id);
-    });
-  }, []);
+    const paymentsProcessor = (data) => {
+      console.log(data);
+      // TODO:
+      // check the `data.action`
+      // if data.action === update then:
+      setPayments((prevPayments) => {
+        const copyPayments = { ...prevPayments };
+        const updatedPayments = data.payments;
+        // TODO: update the payments
+        // - in copyPayments
+        // - with updatedPayments
+        // and return copyPayments
+        return copyPayments;
+      });
+
+      // if data.action === deleted then:
+      // do something different....
+    };
+
+    if (socket) {
+      socket.on("payments", paymentsProcessor);
+      return socket.off("payments", paymentsProcessor);
+    }
+  }, [socket]);
 
   return (
     <>
@@ -65,13 +83,6 @@ function PaymentsView(props) {
           </Tabs>
         </Box>
       </section>
-      {props.showPaymentWindow && (
-        <MakePaymentWindow
-          socket={socket}
-          closeWindow={props.setShowPaymentWindow}
-          paymentDetails={props.payment}
-        />
-      )}
     </>
   );
 }

@@ -8,9 +8,13 @@ import { useEffect, useState, useContext } from "react";
 import CurrenciesContext from "./data/CurrenciesContext";
 import BalanceContext from "./data/BalanceContext";
 
+import io from "socket.io-client";
+
 function App() {
   const [currencies, setCurrencies] = useState({});
   const balance = useContext(BalanceContext);
+
+  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     fetch("https://api.exchangerate.host/symbols")
@@ -18,13 +22,35 @@ function App() {
       .then((data) => setCurrencies(data.symbols));
   }, []);
 
+  useEffect(() => {
+    const newSocket = io("http://localhost:5000");
+    // TODO:
+    // consider parametrizing this link this or another way:
+    // const newSocket = io(`http://${window.location.hostname}:5000`);
+
+    setSocket(newSocket);
+    return () => newSocket.close();
+  }, [setSocket]);
+
+  useEffect(() => {
+    if(socket) {
+      socket.on("connect", () => {
+        console.log("connected with id: " + socket.id);
+      });
+  
+      socket.on("payments", (data) => {
+        console.log(data);
+      });
+    }
+  }, [socket]);
+
   return (
     <CurrenciesContext.Provider value={currencies}>
       <BalanceContext.Provider value={balance}>
         <Grommet>
           <Header />
-          <Hero />
-          <Main />
+          <Hero socket={socket} />
+          <Main socket={socket} />
           <Footer />
         </Grommet>
       </BalanceContext.Provider>
@@ -34,52 +60,3 @@ function App() {
 
 export default App;
 
-// import React, { useState, useEffect } from "react";
-// import io from "socket.io-client";
-
-// const socket = io("http://localhost:5000");
-
-// function App() {
-//   const [isConnected, setIsConnected] = useState(socket.connected);
-//   const [message, setMessage] = useState("hi");
-
-//   useEffect(() => {
-//     socket.on("connect", () => {
-//       setIsConnected(true);
-//       console.log(socket);
-//     });
-
-//     socket.on("message", (data) => {
-//       setMessage(data);
-//       console.log(data);
-//     });
-
-//     socket.on("disconnect", () => {
-//       setIsConnected(false);
-//     });
-
-//     return () => {
-//       socket.off("connect");
-//       socket.off("message");
-//       socket.off("disconnect");
-//     };
-//   }, []);
-
-//   const sendMessage = () => {
-//     socket.emit("message", message);
-//   };
-
-//   const handleChange = (event) => {
-//     setMessage(event.target.value);
-//   };
-
-//   return (
-//     <div>
-//       <p>Connected: {"" + isConnected}</p>
-//       <input value={message} type="text" onChange={handleChange} />
-//       <button onClick={sendMessage}>Send message</button>
-//     </div>
-//   );
-// }
-
-// export default App;
