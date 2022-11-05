@@ -38,6 +38,9 @@ function Main({socket}) {
   const handleChangeForeignAmount = (event) => {
     if (Number(event.target.value) || event.target.value === "") {
       setForeignAmount(event.target.value);
+      // if foreignAmount updated manually, 
+      // then homeAmmount needs to reset and recalculated
+      setHomeAmount("");
     } else {
       event.target.value = foreignAmount;
     }
@@ -83,7 +86,7 @@ function Main({socket}) {
       {showPaymentWindow && (
         <MakePaymentWindow
           closeWindow={setShowPaymentWindow}
-          paymentDetails={payment}
+          paymentDetails={payment.current}
         />
       )}
     </>

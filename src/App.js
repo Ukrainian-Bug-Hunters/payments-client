@@ -24,22 +24,21 @@ function App() {
 
   useEffect(() => {
     const newSocket = io("http://localhost:5000");
+    
     // TODO:
-    // consider parametrizing this link this or another way:
+    // consider parametrizing this link, either the way below or some another way:
     // const newSocket = io(`http://${window.location.hostname}:5000`);
 
     setSocket(newSocket);
-    return () => newSocket.close();
+    return () => {
+      newSocket.close()
+    };
   }, [setSocket]);
 
   useEffect(() => {
     if(socket) {
       socket.on("connect", () => {
-        console.log("connected with id: " + socket.id);
-      });
-  
-      socket.on("payments", (data) => {
-        console.log(data);
+        console.log("connected to Socket with id: " + socket.id);
       });
     }
   }, [socket]);

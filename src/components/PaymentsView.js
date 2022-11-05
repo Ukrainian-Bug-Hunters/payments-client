@@ -6,24 +6,30 @@ import store from "./Store";
 function PaymentsView({ socket }) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const tabNames = ["All Payments", "Complete", "Pending", "Cancelled"];
-  // let payments = store.getState().payments;
-  const [payments, setPayments] = useState(store.getState().payments);
+  
+  let payments = store.getState().payments;
+
+  // TODO: 
+  // get rid of Simple Store, by completing and merging https://trello.com/c/eE1POkeF/22
+  // then use State for keeping payments data (response from back-end, /payments end-point):
+  // const [payments, setPayments] = useState(store.getState().payments);
 
   useEffect(() => {
     const paymentsProcessor = (data) => {
       console.log(data);
-      // TODO:
+      // TODO: when above change (with using payments api) is done 
+      // and Simple Store is removed implement the below approach:
       // check the `data.action`
       // if data.action === update then:
-      setPayments((prevPayments) => {
-        const copyPayments = { ...prevPayments };
-        const updatedPayments = data.payments;
-        // TODO: update the payments
-        // - in copyPayments
-        // - with updatedPayments
-        // and return copyPayments
-        return copyPayments;
-      });
+      // setPayments((prevPayments) => {
+      //   const copyPayments = { ...prevPayments };
+      //   const updatedPayments = data.payments;
+      //   // TODO: update the payments
+      //   // - in copyPayments
+      //   // - with updatedPayments
+      //   // and return copyPayments
+      //   return copyPayments;
+      // });
 
       // if data.action === deleted then:
       // do something different....
@@ -31,7 +37,9 @@ function PaymentsView({ socket }) {
 
     if (socket) {
       socket.on("payments", paymentsProcessor);
-      return socket.off("payments", paymentsProcessor);
+      return () => {
+         socket.off("payments", paymentsProcessor);
+      };
     }
   }, [socket]);
 
