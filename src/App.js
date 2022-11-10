@@ -22,7 +22,7 @@ function App() {
     fetch('http://localhost:4000/balance')
     .then(response => response.json())
     .then(data => {setBalance(data)})
-  })
+  }, []);
 
   return (
     <CurrenciesContext.Provider value={currencies}>
