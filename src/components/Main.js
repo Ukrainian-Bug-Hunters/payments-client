@@ -4,6 +4,7 @@ import CurrenciesContext from "../data/CurrenciesContext";
 import PaymentsView from "./PaymentsView";
 import "./Main.css";
 import BalanceContext from "../data/BalanceContext";
+import MakePaymentWindow from "./MakePaymentWindow";
 
 function Main() {
   const balance = useContext(BalanceContext);
@@ -81,6 +82,12 @@ function Main() {
         showPaymentWindow={showPaymentWindow}
         payment={payment.current}
       />
+      {showPaymentWindow && (
+        <MakePaymentWindow
+          setShowPaymentWindow={setShowPaymentWindow}
+          paymentDetails={payment.current}
+        />
+      )}
     </main>
   );
 }

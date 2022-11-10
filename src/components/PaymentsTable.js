@@ -1,4 +1,4 @@
-import { useCallback, useState, useContext } from "react";
+import { useState, useContext } from "react";
 import {
   Table,
   TableHeader,
@@ -7,19 +7,14 @@ import {
   TableBody,
   Button,
 } from "grommet";
-import store, { cancelPayment } from "./Store";
+
 import BalanceContext from "../data/BalanceContext";
 
-function PaymentsTable({ payments }) {
+function PaymentsTable(props) {
   const balance = useContext(BalanceContext);
   const homeCurrency = balance.currency;
-  const [, updateState] = useState();
-  const forceUpdate = useCallback(() => updateState({}), []);
-
-  const getKey = ({ date, currency, amount, status }) => {
-    return `${date}-${currency}-${amount}-${status}`;
-  };
-
+  const [payments, setPayments] = useState(props.payments);
+  
   const calculateHomeAmount = ({ amount, exchangeRate }) => {
     return Math.round((amount / exchangeRate) * 100) / 100;
   };
@@ -30,6 +25,26 @@ function PaymentsTable({ payments }) {
       }, 0);
     
     return Number(totalAmountHomeCurrency * 100 / 100).toFixed(2);
+  };
+
+  const handleCancelPayment = ({id}) => {
+    fetch(`http://localhost:4000/payments/cancel/${id}`, {method: "PUT"})
+      .then(res => {
+        if(res.ok) {
+          // payment status was changed to `Cancelled`:
+          // reflect it on the page now.
+          const paymentsCopy = [...payments];
+          const payment = paymentsCopy.find(payment => payment.id === id);
+          payment.status = 'Cancelled';
+          
+          setPayments(paymentsCopy);
+        } else {
+          // payment is probably in complete status
+          // we can't change payment's status
+          // so, do nothing.
+        }
+      });
+
   };
 
   return (
@@ -62,7 +77,7 @@ function PaymentsTable({ payments }) {
       <TableBody>
         {payments.map((payment) => {
           return (
-            <TableRow key={getKey(payment)}>
+            <TableRow key={payment.id}>
               <TableCell>{payment.date}</TableCell>
               <TableCell>{payment.currency}</TableCell>
               <TableCell>{payment.amount}</TableCell>
@@ -76,8 +91,7 @@ function PaymentsTable({ payments }) {
                     primary
                     label="Cancel"
                     onClick={() => {
-                      store.dispatch(cancelPayment(payment));
-                      forceUpdate();
+                      handleCancelPayment(payment);
                     }}
                   />
                 ) : (

@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Box, Tab, Tabs } from "grommet";
 import PaymentsTable from "./PaymentsTable";
-import store from "./Store";
-import MakePaymentWindow from "./MakePaymentWindow";
 
 function PaymentsView(props) {
   const [activeTabIndex, setActiveTabIndex] = useState(0);
+  const [payments, setPayments] = useState([]);
+  
   const tabNames = ["All Payments", "Complete", "Pending", "Cancelled"];
-  let payments = store.getState().payments;
+
+  useEffect(() => {
+    fetch(`http://localhost:4000/payments`)
+      .then(res => res.json())
+      .then(data => {
+        setPayments(data);
+      });
+  }, []);
 
   return (
     <>
@@ -57,12 +64,6 @@ function PaymentsView(props) {
           </Tabs>
         </Box>
       </section>
-      {props.showPaymentWindow && (
-        <MakePaymentWindow
-          closeWindow={props.setShowPaymentWindow}
-          paymentDetails={props.payment}
-        />
-      )}
     </>
   );
 }
