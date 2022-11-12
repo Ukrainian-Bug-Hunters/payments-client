@@ -1,14 +1,19 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect, useCallback } from "react";
 import { Layer, Button, TextInput, Text } from "grommet";
 import "./MakePaymentWindow.css";
-import store, { addPayment } from "./Store";
 import BalanceContext from "../data/BalanceContext";
 import noMoney from "../assets/noMoney.gif";
 
+<<<<<<< HEAD
 export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
   const balance = useContext(BalanceContext);
   const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
 
+=======
+export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails, payments, addPayment }) {
+  const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
+  const balance = useContext(BalanceContext);
+>>>>>>> main
   const [homeAmount, setHomeAmount] = useState(paymentDetails?.homeAmount || 0);
   const homeCurrency = paymentDetails?.homeCurrency || balance.currency;
   const foreignCurrency = paymentDetails?.foreignCurrency || "USD";
@@ -17,12 +22,27 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
   );
   const exchangeRate = paymentDetails?.exchangeRate || 0;
   const [description, setDescription] = useState("");
-
+  
   const [amountAvailable, setAmountAvailable] = useState("");
+  
+  const [showNotEnoughMoney, setShowNotEnoughMoney] = useState(false);
+  
+  const getPendingAmont = useCallback(() => {
+    const pendingPayments = payments.filter(({ status }) => status === "Pending");
+
+    const totalPendingAmount = pendingPayments.reduce((total, thisPayment) => {
+      return (total += thisPayment.amount * thisPayment.exchangeRate);
+    }, 0);
+
+    return totalPendingAmount;
+  }, [payments]);
+
+  const pendingAmount = getPendingAmont();
 
   useEffect(() => {
     const pendingAmount = getPendingAmont();
     setAmountAvailable(balance.amount - pendingAmount);
+<<<<<<< HEAD
   }, [homeAmount, balance]);
 
   const getPendingAmont = () => {
@@ -40,6 +60,9 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
   const onClose = () => {
     closeWindow(false);
   };
+=======
+  }, [homeAmount, balance, getPendingAmont]);
+>>>>>>> main
 
   const handleAmountUpdate = (event) => {
     if (event.target.id === "foreign-amount") {
@@ -72,22 +95,32 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
 
     return false;
   };
+<<<<<<< HEAD
 
   const [showNotEnoughMoney, setShowNotEnoughMoney] = useState(false);
 
   let pendingAmount = getPendingAmont();
+=======
+  
+>>>>>>> main
   const handleAddPayment = (payment) => {
     if (pendingAmount + homeAmount > balance.amount) {
       setShowNotEnoughMoney(true);
       return;
     }
-    store.dispatch(addPayment(payment));
-    onClose();
+    addPayment(payment);
   };
 
   return (
     <>
+<<<<<<< HEAD
       <Layer onEsc={() => onClose} onClickOutside={onClose}>
+=======
+      <Layer 
+        onEsc={() => setShowPaymentWindow(false)} 
+        onClickOutside={() => setShowPaymentWindow(false)}
+      >
+>>>>>>> main
         {!!showNotEnoughMoney ? (
           <div className="notEnoughMoney-window">
             <img src={noMoney} alt="no money gif" />
@@ -140,7 +173,11 @@ export default function MakePaymentWindow({ closeWindow, paymentDetails }) {
               </div>
             </div>
             <div className="buttons">
+<<<<<<< HEAD
               <Button primary label="Cancel" size="large" onClick={onClose} />
+=======
+              <Button primary label="Cancel" size="large" onClick={() => setShowPaymentWindow(false)} />
+>>>>>>> main
               <Button
                 primary
                 label="Submit"
