@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   Table,
   TableHeader,
@@ -13,7 +13,13 @@ import BalanceContext from "../data/BalanceContext";
 function PaymentsTable(props) {
   const balance = useContext(BalanceContext);
   const homeCurrency = balance.currency;
-  const [payments, setPayments] = useState(props.payments);
+  const [payments, setPayments] = useState([]);
+
+  useEffect(() => {
+    if(Array.isArray(props.payments) && props.payments.length > 0) {
+      setPayments([...props.payments]);
+    }
+  }, [props.payments]);
   
   const calculateHomeAmount = ({ amount, exchangeRate }) => {
     return Math.round((amount / exchangeRate) * 100) / 100;

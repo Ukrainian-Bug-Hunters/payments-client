@@ -84,7 +84,7 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
       return;
     }
     
-    fetch("http://localhost:4000/payments", {method: "POST", body: payment})
+    fetch("http://localhost:4000/payments", {"method": "post", "body": payment})
       .then(res => {
         if(res.ok) {
           setShowPaymentWindow(false);
@@ -92,6 +92,17 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
           // todo: show error message to the user.
         }
       });
+
+      fetch("http://localhost:4000/payments", {
+        method: "post",
+        headers: {
+           "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payment)
+      })
+      .then(res => {
+        setShowPaymentWindow(false);
+      })
   };
 
   return (
