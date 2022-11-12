@@ -1,9 +1,10 @@
-import React, { useContext, useState, useRef } from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { Select, TextInput, Button } from "grommet";
 import CurrenciesContext from "../data/CurrenciesContext";
 import PaymentsView from "./PaymentsView";
 import "./Main.css";
 import BalanceContext from "../data/BalanceContext";
+import MakePaymentWindow from "./MakePaymentWindow";
 
 function Main() {
   const balance = useContext(BalanceContext);
@@ -14,6 +15,15 @@ function Main() {
   const currencies = useContext(CurrenciesContext);
   const [showPaymentWindow, setShowPaymentWindow] = useState(false);
   const payment = useRef({});
+  const [payments, setPayments] = useState([]);
+
+  useEffect(() => {
+    fetch(`http://localhost:4000/payments`)
+      .then(res => res.json())
+      .then(data => {
+        setPayments(data);
+      });
+  }, []);
 
   const convert = () => {
     fetch(
@@ -32,6 +42,34 @@ function Main() {
 
         setHomeAmount(data.result);
       });
+  };
+
+  const addPayment = (payment) => {
+    
+    fetch("http://localhost:4000/payments", {
+      method: "POST",
+      headers: new Headers({
+        "Content-Type": "application/json"
+      }),
+      body: JSON.stringify(payment)
+    })
+    .then(res => {
+      if(res.ok) {
+        return res.json();
+      } else {
+        throw Error("oooops, we couldn't  post a new payment to the back-end server!");
+      }
+    })
+    .then(newPayment => {
+      setShowPaymentWindow(false);
+      // todo: 
+      /**
+       * `data` is our `new Payments`
+       * we need to add it to the `payments` state now.
+       */
+      setPayments([...payments, newPayment]);
+
+    });
   };
 
   const handleChangeForeignAmount = (event) => {
@@ -80,7 +118,16 @@ function Main() {
         setShowPaymentWindow={setShowPaymentWindow}
         showPaymentWindow={showPaymentWindow}
         payment={payment.current}
+        payments={payments}
       />
+      {showPaymentWindow && (
+        <MakePaymentWindow
+          setShowPaymentWindow={setShowPaymentWindow}
+          paymentDetails={payment.current}
+          payments={payments}
+          addPayment={addPayment}
+        />
+      )}
     </main>
   );
 }

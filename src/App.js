@@ -29,8 +29,12 @@ function App() {
       <BalanceContext.Provider value={balance}>
         <Grommet>
           <Header />
-          <Hero />
-          <Main />
+          { (Object.keys(balance).length > 0 && Object.keys(currencies).length > 0) &&
+            <>
+              <Hero />
+              <Main />
+            </>
+          }
           <Footer />
         </Grommet>
       </BalanceContext.Provider>

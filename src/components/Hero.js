@@ -2,19 +2,28 @@ import { React, useState, useEffect, useContext } from "react";
 import { Select, Text } from "grommet";
 import CurrenciesContext from "../data/CurrenciesContext";
 import BalanceContext from "../data/BalanceContext";
-import store from "./Store";
 import "./Hero.css";
 
 const Hero = () => {
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
+  const [payments, setPayments] = useState([]);
   
   const currencies = useContext(CurrenciesContext);
   const balance  = useContext(BalanceContext);
 
+  useEffect(() => {
+    fetch(`http://localhost:4000/payments`)
+      .then(res => res.json())
+      .then(data => {
+        setPayments(data);
+      });
+  }, []);
+
   const handleChangeCurrency = (currency) => {
     setForeignCurrency(currency);
   };
+
 
   const fetchData = async (url) => {
     try {
@@ -27,7 +36,7 @@ const Hero = () => {
   };
 
   const getPendingAmont = () => {
-    const pendingPayments = store.getState().payments.filter(({status}) => status ==="Pending");
+    const pendingPayments = payments.filter(({status}) => status ==="Pending");
     
     const totalPendingAmount = pendingPayments.reduce((total, thisPayment) => {
       return total += thisPayment.amount * thisPayment.exchangeRate;
