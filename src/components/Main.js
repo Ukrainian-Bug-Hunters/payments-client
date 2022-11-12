@@ -17,17 +17,16 @@ function Main({ socket }) {
   const payment = useRef({});
   const [payments, setPayments] = useState([]);
 
-// TODO:
+  // TODO:
   // get rid of Simple Store, by completing and merging https://trello.com/c/eE1POkeF/22
   // then use State for keeping payments data (response from back-end, /payments end-point):
   // const [payments, setPayments] = useState(store.getState().payments);
 
   useEffect(() => {
     const processMessage = (data) => {
-      console.log(data);
       // TODO: when above change (with using payments api) is done
       // and Simple Store is removed implement the below approach:
-     
+
       // check the `data.action`
       // if data.action === update then:
       // setPayments((prevPayments) => {
@@ -42,7 +41,11 @@ function Main({ socket }) {
 
       // if data.action === deleted then:
       // do something different....
-      
+      fetch(`http://localhost:4000/payments`)
+        .then((res) => res.json())
+        .then((data) => {
+          setPayments(data);
+        });
     };
 
     if (socket) {
