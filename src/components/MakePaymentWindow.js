@@ -4,7 +4,7 @@ import "./MakePaymentWindow.css";
 import BalanceContext from "../data/BalanceContext";
 import noMoney from "../assets/noMoney.gif";
 
-export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails }) {
+export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails, payments, addPayment }) {
   const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
   const balance = useContext(BalanceContext);
   const [homeAmount, setHomeAmount] = useState(paymentDetails?.homeAmount || 0);
@@ -18,15 +18,8 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
   
   const [amountAvailable, setAmountAvailable] = useState("");
   
-  const [payments, setPayments] = useState([]);
-  useEffect(() => {
-    fetch(`http://localhost:4000/payments`)
-      .then(res => res.json())
-      .then(data => {
-        setPayments(data);
-      });
-  }, []);
-
+  const [showNotEnoughMoney, setShowNotEnoughMoney] = useState(false);
+  
   const getPendingAmont = useCallback(() => {
     const pendingPayments = payments.filter(({ status }) => status === "Pending");
 
@@ -36,6 +29,8 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
 
     return totalPendingAmount;
   }, [payments]);
+
+  const pendingAmount = getPendingAmont();
 
   useEffect(() => {
     const pendingAmount = getPendingAmont();
@@ -73,36 +68,13 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
 
     return false;
   };
-
-  const [showNotEnoughMoney, setShowNotEnoughMoney] = useState(false);
-
-  let pendingAmount = getPendingAmont();
-
+  
   const handleAddPayment = (payment) => {
     if (pendingAmount + homeAmount > balance.amount) {
       setShowNotEnoughMoney(true);
       return;
     }
-    
-    fetch("http://localhost:4000/payments", {"method": "post", "body": payment})
-      .then(res => {
-        if(res.ok) {
-          setShowPaymentWindow(false);
-        } else {
-          // todo: show error message to the user.
-        }
-      });
-
-      fetch("http://localhost:4000/payments", {
-        method: "post",
-        headers: {
-           "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payment)
-      })
-      .then(res => {
-        setShowPaymentWindow(false);
-      })
+    addPayment(payment);
   };
 
   return (
