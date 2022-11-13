@@ -30,10 +30,6 @@ function App() {
 
   useEffect(() => {
     const newSocket = io("http://localhost:5000");
-    
-    // TODO:
-    // consider parametrizing this link, either the way below or some another way:
-    // const newSocket = io(`http://${window.location.hostname}:5000`);
 
     setSocket(newSocket);
     return () => {

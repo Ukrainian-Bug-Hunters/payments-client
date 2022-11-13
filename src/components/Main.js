@@ -17,38 +17,28 @@ function Main({ socket }) {
   const payment = useRef({});
   const [payments, setPayments] = useState([]);
 
-  // TODO:
-  // get rid of Simple Store, by completing and merging https://trello.com/c/eE1POkeF/22
-  // then use State for keeping payments data (response from back-end, /payments end-point):
-  // const [payments, setPayments] = useState(store.getState().payments);
-
   useEffect(() => {
     const processMessage = (data) => {
-      // todo: 
-      // get rid of Fetch API here.
-      // `data` - is the payment object that has been 
-      // either:
-      // - created (posted) --> new payment, or
-      // - updated (Description or Status has been changed), or
-      // - deleted (removed from the payments completely).
-      /**
-       * data: Object
-       * {
-       *  action: String | ["created", "updated", "deleted"]
-       *  payment: Object | {id, date, .... }
-       * }
-       */
-      fetch(`http://localhost:4000/payments`)
-        .then((res) => res.json())
-        .then((data) => {
-          setPayments(data);
-        });
+      if (data.action === "created") {
+        setPayments((payments) => [...payments, data.payment]);
+      } else if (data.action === "updated") {
+        setPayments((payments) => [
+          ...payments.filter((payment) => payment.id !== data.payment.id),
+          data.payment,
+        ]);
+      } else if (data.action === "deleted") {
+        setPayments((payments) => [
+          ...payments.filter((payment) => payment.id !== data.payment.id),
+        ]);
+      }
     };
 
     if (socket) {
-      socket.on("payments", processMessage);
+      socket.on("payments", (data) => {
+        processMessage(data);
+      });
       return () => {
-        socket.off("payments", processMessage);
+        socket.off("payments");
       };
     }
   }, [socket]);
@@ -72,11 +62,11 @@ function Main({ socket }) {
           foreignCurrency: foreignCurrency,
           foreignAmount: data.query.amount,
           homeCurrency: homeCurrency,
-          homeAmount: data.result,
+          homeAmount: data.result.toFixed(2),
           exchangeRate: data.info.rate,
         };
 
-        setHomeAmount(data.result);
+        setHomeAmount(data.result.toFixed(2));
       });
   };
 
@@ -87,8 +77,7 @@ function Main({ socket }) {
         "Content-Type": "application/json",
       }),
       body: JSON.stringify(payment),
-    })
-    .then((res) => {
+    }).then((res) => {
       if (res.ok) {
         // do nothing
       } else {
@@ -119,7 +108,7 @@ function Main({ socket }) {
             className="convert-select"
             options={Object.keys(currencies)}
             value={foreignCurrency}
-            onChange={({ currency }) => setForeignCurrency(currency)}
+            onChange={(event) => setForeignCurrency(event.target.value)}
           />
           <TextInput
             className="calc-text-input"
@@ -132,7 +121,7 @@ function Main({ socket }) {
           <TextInput
             className="calc-text-input"
             readOnly
-            placeholder="type here"
+            placeholder="0.00"
             value={homeAmount}
           />
           <div>in {homeCurrency}.</div>

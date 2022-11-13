@@ -15,15 +15,15 @@ function PaymentsTable({ payments }) {
   const homeCurrency = balance.currency;
 
   const calculateHomeAmount = ({ amount, exchangeRate }) => {
-    return Math.round((amount / exchangeRate) * 100) / 100;
+    return Math.round(amount * exchangeRate * 100) / 100;
   };
 
-  const calculateTotalhomeAmount = () => {
+  const calculateTotalHomeAmount = () => {
     const totalAmountHomeCurrency = payments.reduce((total, payment) => {
       return total + calculateHomeAmount(payment);
     }, 0);
 
-    return Number((totalAmountHomeCurrency * 100) / 100).toFixed(2);
+    return Number((totalAmountHomeCurrency * 100) / 100);
   };
 
   const handleCancelPayment = ({ id }) => {
@@ -100,7 +100,7 @@ function PaymentsTable({ payments }) {
           <TableCell></TableCell>
           <TableCell></TableCell>
           <TableCell>
-            <strong>{calculateTotalhomeAmount()}</strong>
+            <strong>{calculateTotalHomeAmount()}</strong>
           </TableCell>
           <TableCell scope="row">
             <strong>Total ({homeCurrency})</strong>
