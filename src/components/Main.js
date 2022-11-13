@@ -24,23 +24,20 @@ function Main({ socket }) {
 
   useEffect(() => {
     const processMessage = (data) => {
-      // TODO: when above change (with using payments api) is done
-      // and Simple Store is removed implement the below approach:
-
-      // check the `data.action`
-      // if data.action === update then:
-      // setPayments((prevPayments) => {
-      //   const copyPayments = { ...prevPayments };
-      //   const updatedPayments = data.payments;
-      //   // TODO: update the payments
-      //   // - in copyPayments
-      //   // - with updatedPayments
-      //   // and return copyPayments
-      //   return copyPayments;
-      // });
-
-      // if data.action === deleted then:
-      // do something different....
+      // todo: 
+      // get rid of Fetch API here.
+      // `data` - is the payment object that has been 
+      // either:
+      // - created (posted) --> new payment, or
+      // - updated (Description or Status has been changed), or
+      // - deleted (removed from the payments completely).
+      /**
+       * data: Object
+       * {
+       *  action: String | ["created", "updated", "deleted"]
+       *  payment: Object | {id, date, .... }
+       * }
+       */
       fetch(`http://localhost:4000/payments`)
         .then((res) => res.json())
         .then((data) => {
@@ -91,24 +88,15 @@ function Main({ socket }) {
       }),
       body: JSON.stringify(payment),
     })
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        } else {
-          throw Error(
-            "oooops, we couldn't  post a new payment to the back-end server!"
-          );
-        }
-      })
-      .then((newPayment) => {
-        setShowPaymentWindow(false);
-        // todo:
-        /**
-         * `data` is our `new Payments`
-         * we need to add it to the `payments` state now.
-         */
-        setPayments([...payments, newPayment]);
-      });
+    .then((res) => {
+      if (res.ok) {
+        // do nothing
+      } else {
+        throw Error(
+          "oooops, we couldn't  post a new payment to the back-end server!"
+        );
+      }
+    });
   };
 
   const handleChangeForeignAmount = (event) => {

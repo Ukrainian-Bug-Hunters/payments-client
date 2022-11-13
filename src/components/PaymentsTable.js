@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useContext } from "react";
 import {
   Table,
   TableHeader,
@@ -10,50 +10,38 @@ import {
 
 import BalanceContext from "../data/BalanceContext";
 
-function PaymentsTable(props) {
+function PaymentsTable({ payments }) {
   const balance = useContext(BalanceContext);
   const homeCurrency = balance.currency;
-  const [payments, setPayments] = useState([]);
 
-  useEffect(() => {
-    if(Array.isArray(props.payments) && props.payments.length > 0) {
-      setPayments([...props.payments]);
-    }
-  }, [props.payments]);
-  
   const calculateHomeAmount = ({ amount, exchangeRate }) => {
     return Math.round((amount / exchangeRate) * 100) / 100;
   };
 
   const calculateTotalhomeAmount = () => {
     const totalAmountHomeCurrency = payments.reduce((total, payment) => {
-        return total + calculateHomeAmount(payment);
-      }, 0);
-    
-    return Number(totalAmountHomeCurrency * 100 / 100).toFixed(2);
+      return total + calculateHomeAmount(payment);
+    }, 0);
+
+    return Number((totalAmountHomeCurrency * 100) / 100).toFixed(2);
   };
 
-  const handleCancelPayment = ({id}) => {
-    fetch(`http://localhost:4000/payments/cancel/${id}`, {method: "PUT"})
-      .then(res => {
-        if(res.ok) {
-          // payment status was changed to `Cancelled`:
-          // reflect it on the page now.
-          const paymentsCopy = [...payments];
-          const payment = paymentsCopy.find(payment => payment.id === id);
-          payment.status = 'Cancelled';
-          
-          setPayments(paymentsCopy);
-        } else {
-          // payment is probably in complete status
-          // we can't change payment's status
-          // so, do nothing.
-        }
-      });
-
+  const handleCancelPayment = ({ id }) => {
+    fetch(`http://localhost:4000/payments/cancel/${id}`, {
+      method: "PUT",
+    }).then((res) => {
+      if (res.ok) {
+        // do nothing
+      } else {
+        // process the error message/data
+        throw Error("ooops!");
+        // todo: make sure `res` has valid error message
+        // that back-end sends us.
+      }
+    });
   };
 
-  return (
+  return payments.length > 0 ? (
     <Table>
       <TableHeader>
         <TableRow>
@@ -120,6 +108,8 @@ function PaymentsTable(props) {
         </TableRow>
       </TableBody>
     </Table>
+  ) : (
+    <div></div>
   );
 }
 
