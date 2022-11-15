@@ -4,7 +4,12 @@ import "./MakePaymentWindow.css";
 import BalanceContext from "../data/BalanceContext";
 import noMoney from "../assets/noMoney.gif";
 
-export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails, payments, addPayment }) {
+export default function MakePaymentWindow({
+  setShowPaymentWindow,
+  paymentDetails,
+  payments,
+  addPayment,
+}) {
   const date = paymentDetails?.date || new Date().toLocaleDateString("fr-CA");
   const balance = useContext(BalanceContext);
   const [homeAmount, setHomeAmount] = useState(paymentDetails?.homeAmount || 0);
@@ -15,13 +20,15 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
   );
   const exchangeRate = paymentDetails?.exchangeRate || 0;
   const [description, setDescription] = useState("");
-  
+
   const [amountAvailable, setAmountAvailable] = useState("");
-  
+
   const [showNotEnoughMoney, setShowNotEnoughMoney] = useState(false);
-  
+
   const getPendingAmont = useCallback(() => {
-    const pendingPayments = payments.filter(({ status }) => status === "Pending");
+    const pendingPayments = payments.filter(
+      ({ status }) => status === "Pending"
+    );
 
     const totalPendingAmount = pendingPayments.reduce((total, thisPayment) => {
       return (total += thisPayment.amount * thisPayment.exchangeRate);
@@ -68,22 +75,33 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
 
     return false;
   };
-  
-  const handleAddPayment = (payment) => {
+
+  const handleAddPayment = () => {
+    const payment = {
+      date: date,
+      currency: foreignCurrency,
+      amount: foreignAmount,
+      exchangeRate: exchangeRate,
+      description: description,
+      status: "Pending",
+    };
+    
     if (pendingAmount + homeAmount > balance.amount) {
       setShowNotEnoughMoney(true);
       return;
     }
+
     addPayment(payment);
+    setShowPaymentWindow(false);
   };
 
   return (
     <>
-      <Layer 
-        onEsc={() => setShowPaymentWindow(false)} 
+      <Layer
+        onEsc={() => setShowPaymentWindow(false)}
         onClickOutside={() => setShowPaymentWindow(false)}
       >
-        {!!showNotEnoughMoney ? (
+        {showNotEnoughMoney ? (
           <div className="notEnoughMoney-window">
             <img src={noMoney} alt="no money gif" />
             <h2>You have not enough money!</h2>
@@ -135,22 +153,17 @@ export default function MakePaymentWindow({ setShowPaymentWindow, paymentDetails
               </div>
             </div>
             <div className="buttons">
-              <Button primary label="Cancel" size="large" onClick={() => setShowPaymentWindow(false)} />
+              <Button
+                primary
+                label="Cancel"
+                size="large"
+                onClick={() => setShowPaymentWindow(false)}
+              />
               <Button
                 primary
                 label="Submit"
                 size="large"
-                onClick={() => {
-                  const payment = {
-                    date: date,
-                    currency: foreignCurrency,
-                    amount: foreignAmount,
-                    exchangeRate: exchangeRate,
-                    description: description,
-                    status: "Pending",
-                  };
-                  handleAddPayment(payment);
-                }}
+                onClick={handleAddPayment}
               />
             </div>
           </div>

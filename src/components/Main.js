@@ -6,7 +6,7 @@ import "./Main.css";
 import BalanceContext from "../data/BalanceContext";
 import MakePaymentWindow from "./MakePaymentWindow";
 
-function Main() {
+function Main({ socket }) {
   const balance = useContext(BalanceContext);
   const [foreignCurrency, setForeignCurrency] = useState("USD");
   const [foreignAmount, setForeignAmount] = useState(0);
@@ -18,9 +18,35 @@ function Main() {
   const [payments, setPayments] = useState([]);
 
   useEffect(() => {
+    const processMessage = (data) => {
+      if (data.action === "created") {
+        setPayments((payments) => [...payments, data.payment]);
+      } else if (data.action === "updated") {
+        setPayments((payments) => [
+          ...payments.filter((payment) => payment.id !== data.payment.id),
+          data.payment,
+        ]);
+      } else if (data.action === "deleted") {
+        setPayments((payments) => [
+          ...payments.filter((payment) => payment.id !== data.payment.id),
+        ]);
+      }
+    };
+
+    if (socket) {
+      socket.on("payments", (data) => {
+        processMessage(data);
+      });
+      return () => {
+        socket.off("payments");
+      };
+    }
+  }, [socket]);
+
+  useEffect(() => {
     fetch(`http://localhost:4000/payments`)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         setPayments(data);
       });
   }, []);
@@ -36,45 +62,38 @@ function Main() {
           foreignCurrency: foreignCurrency,
           foreignAmount: data.query.amount,
           homeCurrency: homeCurrency,
-          homeAmount: data.result,
+          homeAmount: data.result.toFixed(2),
           exchangeRate: data.info.rate,
         };
 
-        setHomeAmount(data.result);
+        setHomeAmount(data.result.toFixed(2));
       });
   };
 
   const addPayment = (payment) => {
-    
     fetch("http://localhost:4000/payments", {
       method: "POST",
       headers: new Headers({
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       }),
-      body: JSON.stringify(payment)
-    })
-    .then(res => {
-      if(res.ok) {
-        return res.json();
+      body: JSON.stringify(payment),
+    }).then((res) => {
+      if (res.ok) {
+        // do nothing
       } else {
-        throw Error("oooops, we couldn't  post a new payment to the back-end server!");
+        throw Error(
+          "oooops, we couldn't  post a new payment to the back-end server!"
+        );
       }
-    })
-    .then(newPayment => {
-      setShowPaymentWindow(false);
-      // todo: 
-      /**
-       * `data` is our `new Payments`
-       * we need to add it to the `payments` state now.
-       */
-      setPayments([...payments, newPayment]);
-
     });
   };
 
   const handleChangeForeignAmount = (event) => {
     if (Number(event.target.value) || event.target.value === "") {
       setForeignAmount(event.target.value);
+      // if foreignAmount updated manually,
+      // then homeAmmount needs to reset and recalculated
+      setHomeAmount("");
     } else {
       event.target.value = foreignAmount;
     }
@@ -89,7 +108,7 @@ function Main() {
             className="convert-select"
             options={Object.keys(currencies)}
             value={foreignCurrency}
-            onChange={({ currency }) => setForeignCurrency(currency)}
+            onChange={(event) => setForeignCurrency(event.target.value)}
           />
           <TextInput
             className="calc-text-input"
@@ -102,7 +121,7 @@ function Main() {
           <TextInput
             className="calc-text-input"
             readOnly
-            placeholder="type here"
+            placeholder="0.00"
             value={homeAmount}
           />
           <div>in {homeCurrency}.</div>
@@ -114,12 +133,10 @@ function Main() {
           onClick={() => setShowPaymentWindow(true)}
         />
       </section>
-      <PaymentsView
-        setShowPaymentWindow={setShowPaymentWindow}
-        showPaymentWindow={showPaymentWindow}
-        payment={payment.current}
-        payments={payments}
-      />
+      <section>
+        <PaymentsView payments={payments} />
+      </section>
+
       {showPaymentWindow && (
         <MakePaymentWindow
           setShowPaymentWindow={setShowPaymentWindow}
